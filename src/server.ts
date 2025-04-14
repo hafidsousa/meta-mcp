@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { FacebookMarketingClient } from './client';
 import { CampaignConfig, AdSetConfig, AdConfig, FacebookConfig } from './types';
 import { config as loadEnv } from 'dotenv';

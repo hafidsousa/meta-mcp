@@ -25,6 +25,23 @@
    - ts-node for development
    - npm scripts for build and test
 
+## Documentation
+
+1. **README.md**
+   - Main documentation for MCP clients
+   - Installation instructions
+   - Configuration examples
+   - Usage examples
+
+2. **DEVELOPER.md**
+   - Detailed documentation for developers
+   - Project structure overview
+   - Local development setup
+   - Testing procedures
+   - Publishing instructions
+   - Library architecture details
+   - Contribution guidelines
+
 ## Technical Constraints
 1. **API Limitations**
    - Facebook Graph API rate limits

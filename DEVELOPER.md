@@ -87,6 +87,38 @@ This will create:
 
 All items are created in PAUSED state for safety.
 
+## Testing Locally Before Publishing
+
+Before publishing your changes to npm, it's good practice to test the package locally:
+
+1. Build the package:
+   ```bash
+   npm run build
+   ```
+
+2. Pack the package into a tarball:
+   ```bash
+   npm pack
+   ```
+   This creates a file like `meta-mcp-1.1.0.tgz` in your current directory.
+
+3. Install the package globally from the local tarball:
+   ```bash
+   npm install -g ./meta-mcp-1.1.0.tgz
+   ```
+
+4. Test the CLI command:
+   ```bash
+   meta-mcp
+   ```
+
+5. Or test with npx:
+   ```bash
+   npx ./meta-mcp-1.1.0.tgz
+   ```
+
+This local testing process helps identify issues with the package binaries, executables, and overall structure before publishing to npm.
+
 ## Library Architecture
 
 ### Core Components
@@ -126,6 +158,8 @@ The implementation uses the Facebook Graph API directly without relying on the F
 
 ## Building and Publishing
 
+### Building the Package
+
 To build the package:
 
 ```bash
@@ -134,13 +168,25 @@ npm run build
 
 The compiled output will be in the `dist/` directory.
 
-To prepare for publishing:
+### Publishing to npm
 
-```bash
-npm run prepare
-```
+When you're ready to publish:
 
-This will run the build script and perform any other necessary preparations.
+1. Update the version in package.json:
+   ```bash
+   npm version patch  # Increases patch version (1.0.0 -> 1.0.1)
+   # or
+   npm version minor  # Increases minor version (1.0.0 -> 1.1.0)
+   # or
+   npm version major  # Increases major version (1.0.0 -> 2.0.0)
+   ```
+
+2. Publish to npm:
+   ```bash
+   npm publish
+   ```
+
+This will run the `prepublishOnly` script to build the package and then publish it to the npm registry.
 
 ## License
 

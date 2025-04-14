@@ -15,7 +15,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts",
-    "prepare": "npm run build",
+    "prepare": "npm run build && chmod +x dist/server.js",
     "prepublishOnly": "npm run build",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"**/*.ts\"",

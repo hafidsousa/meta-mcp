@@ -3,11 +3,21 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnp/
+.pnp.js
+.npm/
 
 # Build output
 dist/
 build/
 *.tsbuildinfo
+*.tgz
+*.tar.gz
+*.zip
+lib/
+out/
+.cache/
+.output/
 
 # Environment variables
 .env
@@ -15,20 +25,61 @@ build/
 .env.*.local
 .env.test
 .env.production
+.env.development
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-*
+.project
+.classpath
+.settings/
+.history/
+.ionide/
+*.iml
+*.ipr
+*.iws
+.c9/
+*.launch
+*.suo
+*.user
+*.userosscache
+*.dbmdl
+*.jfm
 
 # Logs
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
 # Testing
 coverage/
+.nyc_output/
+.jest/
+junit.xml
+test-results.xml
+jest-*.json
+.eslintcache
 
 # Misc
 .DS_Store
-Thumbs.db 
+Thumbs.db
+.directory
+*.pid
+*.seed
+*.pid.lock
+.temp/
+.tmp/
+tmp/
+temp/
+
+# TypeScript
+*.js.map
+*.d.ts.map
+*.tsbuildinfo 
