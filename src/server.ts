@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  Tool,
+} from "@modelcontextprotocol/sdk/types.js";
 import { FacebookMarketingClient } from './client';
 import { CampaignConfig, AdSetConfig, AdConfig, FacebookConfig } from './types';
 import { config as loadEnv } from 'dotenv';
@@ -12,7 +19,7 @@ loadEnv();
  * @param message Message to log
  */
 function log(message: string) {
-  process.stderr.write(`${message}\n`);
+  console.error(message);
 }
 
 // Initialize Facebook client with environment variables
@@ -23,167 +30,325 @@ const fbConfig: FacebookConfig = {
   appSecret: process.env.FB_APP_SECRET || ''
 };
 
-const client = new FacebookMarketingClient(fbConfig);
-
-export const createCampaign = async (params: { config: Partial<CampaignConfig> }) => {
-  return client.createCampaign(params.config as CampaignConfig);
+// Define all available tools
+const CAMPAIGN_TOOL: Tool = {
+  name: "createCampaign",
+  description: "Creates a new Facebook ad campaign",
+  inputSchema: {
+    type: "object",
+    properties: {
+      config: {
+        type: "object",
+        description: "Campaign configuration",
+        properties: {
+          name: { type: "string", description: "Campaign name" },
+          objective: { type: "string", description: "Campaign objective (e.g., CONVERSIONS, MESSAGES)" },
+          status: { type: "string", description: "Campaign status (ACTIVE, PAUSED)" },
+          specialAdCategories: { type: "array", description: "Special ad categories if applicable" }
+        },
+        required: ["name", "objective"]
+      }
+    },
+    required: ["config"]
+  }
 };
 
-export const createAdSet = async (params: { config: Partial<AdSetConfig> }) => {
-  return client.createAdSet(params.config);
+const ADSET_TOOL: Tool = {
+  name: "createAdSet",
+  description: "Creates a new ad set within a campaign",
+  inputSchema: {
+    type: "object",
+    properties: {
+      config: {
+        type: "object",
+        description: "Ad set configuration",
+        properties: {
+          name: { type: "string", description: "Ad set name" },
+          campaignId: { type: "string", description: "Parent campaign ID" },
+          dailyBudget: { type: "number", description: "Daily budget in cents (e.g., 5000 = $50.00)" },
+          targeting: { type: "object", description: "Targeting specifications" }
+        },
+        required: ["name", "campaignId"]
+      }
+    },
+    required: ["config"]
+  }
 };
 
-export const createAd = async (params: { config: AdConfig }) => {
-  return client.createAd(params.config);
+const AD_TOOL: Tool = {
+  name: "createAd",
+  description: "Creates a new ad within an ad set",
+  inputSchema: {
+    type: "object",
+    properties: {
+      config: {
+        type: "object",
+        description: "Ad configuration",
+        properties: {
+          name: { type: "string", description: "Ad name" },
+          adsetId: { type: "string", description: "Parent ad set ID" },
+          creative: { type: "object", description: "Ad creative configuration" }
+        },
+        required: ["name", "adsetId", "creative"]
+      }
+    },
+    required: ["config"]
+  }
 };
 
-export const getAdSets = async (params: { campaignId: string }) => {
-  return client.getAdSets(params.campaignId);
+const GET_ADSETS_TOOL: Tool = {
+  name: "getAdSets",
+  description: "Gets all ad sets for a campaign",
+  inputSchema: {
+    type: "object",
+    properties: {
+      campaignId: { type: "string", description: "Campaign ID" }
+    },
+    required: ["campaignId"]
+  }
 };
 
-export const getAds = async (params: { adSetId: string }) => {
-  return client.getAds(params.adSetId);
+const GET_ADS_TOOL: Tool = {
+  name: "getAds",
+  description: "Gets all ads for an ad set",
+  inputSchema: {
+    type: "object",
+    properties: {
+      adSetId: { type: "string", description: "Ad set ID" }
+    },
+    required: ["adSetId"]
+  }
 };
 
-export const pauseCampaign = async (params: { campaignId: string }) => {
-  return client.pauseCampaign(params.campaignId);
+const PAUSE_CAMPAIGN_TOOL: Tool = {
+  name: "pauseCampaign",
+  description: "Pauses an active campaign",
+  inputSchema: {
+    type: "object",
+    properties: {
+      campaignId: { type: "string", description: "Campaign ID" }
+    },
+    required: ["campaignId"]
+  }
 };
 
-export const pauseAdSet = async (params: { adSetId: string }) => {
-  return client.pauseAdSet(params.adSetId);
+const PAUSE_ADSET_TOOL: Tool = {
+  name: "pauseAdSet",
+  description: "Pauses an active ad set",
+  inputSchema: {
+    type: "object",
+    properties: {
+      adSetId: { type: "string", description: "Ad set ID" }
+    },
+    required: ["adSetId"]
+  }
 };
 
-export const pauseAd = async (params: { adId: string }) => {
-  return client.pauseAd(params.adId);
+const PAUSE_AD_TOOL: Tool = {
+  name: "pauseAd",
+  description: "Pauses an active ad",
+  inputSchema: {
+    type: "object",
+    properties: {
+      adId: { type: "string", description: "Ad ID" }
+    },
+    required: ["adId"]
+  }
 };
 
-export const getAvailableAdAccounts = async () => {
-  return client.getAvailableAdAccounts();
+const GET_ACCOUNTS_TOOL: Tool = {
+  name: "getAvailableAdAccounts",
+  description: "Gets all available ad accounts for the user",
+  inputSchema: {
+    type: "object",
+    properties: {}
+  }
 };
 
-export const getCampaigns = async () => {
-  return client.getCampaigns();
+const GET_CAMPAIGNS_TOOL: Tool = {
+  name: "getCampaigns",
+  description: "Gets all campaigns for the ad account",
+  inputSchema: {
+    type: "object",
+    properties: {}
+  }
 };
 
-// MCP Server initialization
-if (require.main === module) {
-  // This code executes when the script is run directly
-  
-  // Check if the required environment variables are set
+// Create the MCP server
+const server = new Server(
+  {
+    name: "meta-mcp",
+    version: "1.1.0",
+  },
+  {
+    capabilities: {
+      tools: {},
+    },
+  }
+);
+
+// Initialize our Facebook client
+let client: FacebookMarketingClient;
+
+function initializeClient() {
+  // Validate required environment variables
   if (!fbConfig.accessToken) {
-    log('Error: FB_ACCESS_TOKEN environment variable is required');
-    process.exit(1);
+    throw new Error('FB_ACCESS_TOKEN environment variable is required');
   }
 
   if (!fbConfig.adAccountId) {
-    log('Error: FB_AD_ACCOUNT_ID environment variable is required');
-    process.exit(1);
+    throw new Error('FB_AD_ACCOUNT_ID environment variable is required');
   }
 
-  log('Starting Meta MCP Server...');
+  log('Initializing Facebook Marketing Client...');
   log(`Using Ad Account ID: ${fbConfig.adAccountId}`);
-
-  // Override console.log to use stderr for MCP server
-  const originalConsoleLog = console.log;
-  console.log = (...args) => {
-    log(args.join(' '));
-  };
-
-  // Set up the MCP communication (STDIO transport)
-  process.stdin.setEncoding('utf-8');
   
-  let buffer = '';
-  
-  process.stdin.on('data', async (data) => {
-    buffer += data.toString();
+  client = new FacebookMarketingClient(fbConfig);
+}
+
+// Handler for listing available tools
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: [
+    CAMPAIGN_TOOL,
+    ADSET_TOOL,
+    AD_TOOL,
+    GET_ADSETS_TOOL,
+    GET_ADS_TOOL,
+    PAUSE_CAMPAIGN_TOOL,
+    PAUSE_ADSET_TOOL,
+    PAUSE_AD_TOOL,
+    GET_ACCOUNTS_TOOL,
+    GET_CAMPAIGNS_TOOL,
+  ],
+}));
+
+// Handler for executing tool calls
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  try {
+    const { name, arguments: args = {} } = request.params;
     
-    // Process complete JSON messages
-    let newlineIndex;
-    while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
-      const message = buffer.slice(0, newlineIndex);
-      buffer = buffer.slice(newlineIndex + 1);
-      
-      let request: { id?: number | string, method?: string, params?: any } = {};
-      
-      try {
-        request = JSON.parse(message);
-        const { id, method, params } = request;
-        
-        log(`Received request ${id}: ${method}`);
-        
-        let result;
-        
-        // Execute the requested method
-        switch (method) {
-          case 'createCampaign':
-            result = await createCampaign(params);
-            break;
-          case 'createAdSet':
-            result = await createAdSet(params);
-            break;
-          case 'createAd':
-            result = await createAd(params);
-            break;
-          case 'getAdSets':
-            result = await getAdSets(params);
-            break;
-          case 'getAds':
-            result = await getAds(params);
-            break;
-          case 'pauseCampaign':
-            result = await pauseCampaign(params);
-            break;
-          case 'pauseAdSet':
-            result = await pauseAdSet(params);
-            break;
-          case 'pauseAd':
-            result = await pauseAd(params);
-            break;
-          case 'getAvailableAdAccounts':
-            result = await getAvailableAdAccounts();
-            break;
-          case 'getCampaigns':
-            result = await getCampaigns();
-            break;
-          default:
-            throw new Error(`Unknown method: ${method}`);
-        }
-        
-        // Send the response
-        const response = {
-          id,
-          result,
-          jsonrpc: '2.0'
-        };
-        
-        process.stdout.write(JSON.stringify(response) + '\n');
-      } catch (error) {
-        // Handle errors
-        const errorResponse = {
-          id: request?.id || null,
-          error: {
-            code: -32000,
-            message: error instanceof Error ? error.message : 'Unknown error'
-          },
-          jsonrpc: '2.0'
-        };
-        
-        process.stdout.write(JSON.stringify(errorResponse) + '\n');
-      }
+    if (!client) {
+      initializeClient();
     }
-  });
+    
+    log(`Executing tool: ${name}`);
+    
+    let result;
+    
+    switch (name) {
+      case "createCampaign":
+        if (!args.config) {
+          throw new Error("Missing required parameter: config");
+        }
+        result = await client.createCampaign(args.config as CampaignConfig);
+        break;
+      
+      case "createAdSet":
+        if (!args.config) {
+          throw new Error("Missing required parameter: config");
+        }
+        result = await client.createAdSet(args.config as Partial<AdSetConfig>);
+        break;
+      
+      case "createAd":
+        if (!args.config) {
+          throw new Error("Missing required parameter: config");
+        }
+        result = await client.createAd(args.config as AdConfig);
+        break;
+      
+      case "getAdSets":
+        if (typeof args.campaignId !== 'string') {
+          throw new Error("Missing or invalid required parameter: campaignId");
+        }
+        result = await client.getAdSets(args.campaignId);
+        break;
+      
+      case "getAds":
+        if (typeof args.adSetId !== 'string') {
+          throw new Error("Missing or invalid required parameter: adSetId");
+        }
+        result = await client.getAds(args.adSetId);
+        break;
+      
+      case "pauseCampaign":
+        if (typeof args.campaignId !== 'string') {
+          throw new Error("Missing or invalid required parameter: campaignId");
+        }
+        result = await client.pauseCampaign(args.campaignId);
+        break;
+      
+      case "pauseAdSet":
+        if (typeof args.adSetId !== 'string') {
+          throw new Error("Missing or invalid required parameter: adSetId");
+        }
+        result = await client.pauseAdSet(args.adSetId);
+        break;
+      
+      case "pauseAd":
+        if (typeof args.adId !== 'string') {
+          throw new Error("Missing or invalid required parameter: adId");
+        }
+        result = await client.pauseAd(args.adId);
+        break;
+      
+      case "getAvailableAdAccounts":
+        result = await client.getAvailableAdAccounts();
+        break;
+      
+      case "getCampaigns":
+        result = await client.getCampaigns();
+        break;
+      
+      default:
+        return {
+          content: [{ type: "text", text: `Unknown tool: ${name}` }],
+          isError: true,
+        };
+    }
+    
+    return {
+      content: [
+        { 
+          type: "text", 
+          text: typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result)
+        }
+      ],
+      isError: false,
+    };
+    
+  } catch (error) {
+    log(`Error executing tool: ${error instanceof Error ? error.message : String(error)}`);
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+      isError: true,
+    };
+  }
+});
 
-  // Send initial ready signal
-  const readyMessage = {
-    jsonrpc: '2.0',
-    method: 'ready',
-    params: { version: '1.0.0' }
-  };
-  process.stdout.write(JSON.stringify(readyMessage) + '\n');
-  
-  // Handle exit signals
-  process.on('SIGINT', () => {
-    log('Shutting down...');
-    process.exit(0);
-  });
-} 
+// Main function to start the server
+async function runServer() {
+  try {
+    initializeClient();
+    
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+    
+    log("Meta MCP Server running on stdio");
+  } catch (error) {
+    log(`Fatal error initializing server: ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
+  }
+}
+
+// Start the server
+runServer().catch((error) => {
+  log(`Fatal error running server: ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+}); 
