@@ -3,10 +3,10 @@
  * 
  * @note For AI Assistants:
  * - All monetary values should be in cents (2000 = $20.00)
- * - Status values should use proper enums (e.g., Campaign.Status.ACTIVE)
+ * - Status values should use standard Facebook API values (e.g., 'ACTIVE', 'PAUSED')
  */
 
-import { Campaign, AdSet, Ad } from 'facebook-nodejs-business-sdk';
+// Remove SDK import and define our own types
 
 export interface FacebookConfig {
   /** Access token with ads_management permission */
@@ -23,7 +23,9 @@ export interface CampaignConfig {
   /** Campaign name following format: [Objective]-[Target]-[Date] */
   name: string;
   /** Campaign objective */
-  objective: 'CONVERSIONS' | 'LINK_CLICKS' | 'APP_INSTALLS' | 'BRAND_AWARENESS';
+  objective: 'CONVERSIONS' | 'LINK_CLICKS' | 'APP_INSTALLS' | 'BRAND_AWARENESS' | 
+             'OUTCOME_LEADS' | 'OUTCOME_SALES' | 'OUTCOME_ENGAGEMENT' | 
+             'OUTCOME_AWARENESS' | 'OUTCOME_TRAFFIC' | 'OUTCOME_APP_PROMOTION';
   /** Initial campaign status */
   status: 'ACTIVE' | 'PAUSED';
   /** Special ad category restrictions */
@@ -43,6 +45,8 @@ export interface AdSetConfig {
   startTime?: string;
   /** Optional end time for the ad set */
   endTime?: string;
+  /** Initial ad set status */
+  status?: 'ACTIVE' | 'PAUSED';
   /** Targeting configuration */
   targeting: {
     /** Geographic targeting */
@@ -61,7 +65,11 @@ export interface AdSetConfig {
     interests?: string[];
   };
   /** Optimization goal */
-  optimizationGoal?: string;
+  optimizationGoal?: 'NONE' | 'APP_INSTALLS' | 'AD_RECALL_LIFT' | 'ENGAGED_USERS' | 
+                     'EVENT_RESPONSES' | 'IMPRESSIONS' | 'LEAD_GENERATION' | 'QUALITY_LEAD' | 
+                     'LINK_CLICKS' | 'OFFSITE_CONVERSIONS' | 'PAGE_LIKES' | 'POST_ENGAGEMENT' | 
+                     'QUALITY_CALL' | 'REACH' | 'LANDING_PAGE_VIEWS' | 'VISIT_INSTAGRAM_PROFILE' | 
+                     'VALUE' | 'THRUPLAY' | 'DERIVED_EVENTS' | 'CONVERSIONS';
   /** Billing event type */
   billingEvent?: string;
 }
@@ -92,6 +100,39 @@ export interface AdConfig {
   status: 'ACTIVE' | 'PAUSED';
   /** Creative configuration */
   creative: AdCreativeConfig;
+}
+
+// Define our own campaign, ad set and ad objects instead of using SDK types
+export interface Campaign {
+  id: string;
+  name: string;
+  objective: string;
+  status: string;
+  created_time?: string;
+  start_time?: string;
+  stop_time?: string;
+  spend_cap?: string;
+  [key: string]: any;
+}
+
+export interface AdSet {
+  id: string;
+  name: string;
+  campaign_id: string;
+  daily_budget?: string;
+  lifetime_budget?: string;
+  targeting?: Record<string, any>;
+  status: string;
+  [key: string]: any;
+}
+
+export interface Ad {
+  id: string;
+  name: string;
+  adset_id: string;
+  creative?: Record<string, any>;
+  status: string;
+  [key: string]: any;
 }
 
 export interface CampaignResponse {
@@ -127,14 +168,12 @@ export interface AdResponse {
   error?: any;
 }
 
-// Extended FacebookAdsApi type to include missing methods
-declare module 'facebook-nodejs-business-sdk' {
-  interface FacebookAdsApi {
-    createCampaign(config: CampaignConfig & { account_id: string }): Promise<Campaign>;
-    createAdSet(config: AdSetConfig & { account_id: string }): Promise<AdSet>;
-    createAd(config: AdConfig & { account_id: string }): Promise<Ad>;
-    getAdSets(ids: string[]): Promise<AdSet[]>;
-    getAds(ids: string[]): Promise<Ad[]>;
-    call<T>(method: string, path: string, params?: Record<string, any>): Promise<T>;
-  }
+export interface FacebookAdAccount {
+  id: string;
+  name: string;
+  account_id: string;
+  account_status: number;
+  amount_spent: string;
+  currency: string;
+  [key: string]: any;
 } 

@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 The system follows a modular architecture with clear separation of concerns:
-1. **API Integration Layer**: Handles Facebook Marketing API communication
+1. **Graph API Integration Layer**: Handles direct Facebook Graph API communication
 2. **MCP Interface**: Manages Cursor IDE integration
 3. **Configuration Management**: Handles environment and credentials
 4. **Operation Handlers**: Processes specific advertising operations
@@ -13,7 +13,8 @@ The system follows a modular architecture with clear separation of concerns:
 2. **Modular Design**: Enables easy extension and maintenance
 3. **Environment-based Configuration**: Supports different deployment scenarios
 4. **Error Handling Strategy**: Comprehensive error management
-5. **API Versioning**: Support for Facebook Marketing API v18.0.0
+5. **API Versioning**: Support for Facebook Graph API v22.0
+6. **Direct API Integration**: Using native fetch for Facebook Graph API calls without SDK dependencies
 
 ## Design Patterns
 1. **Command Pattern**: For handling different advertising operations

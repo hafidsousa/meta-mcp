@@ -4,18 +4,25 @@
   "description": "MCP Server for Facebook Marketing API integration",
   "main": "dist/server.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "meta-mcp": "dist/server.js"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
+    "test": "jest",
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
-    "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"**/*.ts\"",
     "type-check": "tsc --noEmit",
-    "list-accounts": "ts-node src/list-accounts.ts"
+    "list-accounts": "ts-node src/list-accounts.ts",
+    "list-campaigns": "ts-node src/list-campaigns.ts",
+    "generate-token-url": "ts-node src/generate-token-url.ts"
   },
   "keywords": [
     "facebook",
@@ -27,8 +34,7 @@
   "author": "Hafid Sousa",
   "license": "MIT",
   "dependencies": {
-    "facebook-nodejs-business-sdk": "^18.0.0",
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.3"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -161,6 +167,9 @@
       "getAvailableAdAccounts": {
         "description": "Get all available ad accounts for the current user",
         "parameters": {}
+      },
+      "getCampaigns": {
+        "description": "Get all campaigns for the configured ad account"
       }
     }
   }

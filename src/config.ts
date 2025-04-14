@@ -5,7 +5,6 @@
  * - All monetary values in cents (2000 = $20.00)
  */
 
-import { Campaign, AdSet } from 'facebook-nodejs-business-sdk';
 import { CampaignConfig, AdSetConfig, AdCreativeConfig } from './types';
 
 export const DEFAULT_CAMPAIGN_CONFIG: Partial<CampaignConfig> = {
@@ -37,7 +36,7 @@ export const CAMPAIGN_NAME_FORMAT = '[Objective]-[Target]-[Date]';
 export const ADSET_NAME_FORMAT = '[Target Audience]-[Placement]-[Date]';
 export const AD_NAME_FORMAT = '[Creative Type]-[Target]-[Date]';
 
-export const FB_API_VERSION = 'v18.0'; // Update this as needed
+export const FB_API_VERSION = 'v22.0'; // Updated to latest version
 
 export interface FacebookApiConfig {
   accessToken: string;

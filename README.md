@@ -27,7 +27,7 @@ Add Meta MCP to your Cursor MCP configuration at `~/.cursor/mcp.json`:
   "mcpServers": {
     "meta-mcp": {
       "command": "npx",
-      "args": ["meta-mcp"],
+      "args": ["-y", "meta-mcp"],
       "env": {
         "FB_ACCESS_TOKEN": "your_access_token_here",
         "FB_AD_ACCOUNT_ID": "your_ad_account_id_here",
@@ -39,6 +39,8 @@ Add Meta MCP to your Cursor MCP configuration at `~/.cursor/mcp.json`:
 }
 ```
 
+The `-y` flag ensures that npx runs in non-interactive mode, automatically approving any prompts that might appear during installation or execution.
+
 ### 2. Find Your Ad Account ID
 
 If you don't know your Facebook Ad Account ID, you can use the included tool to list all available ad accounts:
@@ -49,7 +51,19 @@ npx meta-mcp list-accounts
 
 This tool only requires the `FB_ACCESS_TOKEN` environment variable and will display all ad accounts you have access to. You can then use one of the displayed account IDs in your configuration.
 
-### 3. Set Required Environment Variables
+### 3. Get a Facebook Access Token
+
+To obtain a Facebook access token with the necessary permissions:
+
+```bash
+npx meta-mcp generate-token-url
+```
+
+This will generate a URL you can visit to authorize your app and get an access token. The tool provides step-by-step instructions for obtaining and using the token.
+
+Alternatively, you can visit the [Graph API Explorer](https://developers.facebook.com/tools/explorer/) to generate a token manually.
+
+### 4. Set Required Environment Variables
 
 You can set environment variables either through the MCP configuration as shown above, or by creating a `.env` file in your project:
 
@@ -211,6 +225,81 @@ If you encounter issues:
 3. Verify the MCP server is properly configured in Cursor
 4. Check Cursor logs: `~/.cursor/logs/cursor.log`
 
+## For Developers
+
+If you're interested in contributing to this project or running it locally for development, please see the [Developer Guide](./DEVELOPER.md) for detailed instructions.
+
 ## License
 
 MIT License - See LICENSE file for details.
+
+## Ad Campaign Creation
+
+This package includes a script for creating a complete Facebook ad campaign including:
+1. Campaign with objectives (conversions, brand awareness, etc.)
+2. Ad Set with targeting options and budget
+3. Ad with creative content (images, text, etc.)
+
+### Getting Started
+
+1. Clone this repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Copy the `.env.example` file to `.env` and fill in your Facebook API credentials:
+   ```
+   cp .env.example .env
+   ```
+4. Edit the `.env` file with your credentials:
+   - `FB_AD_ACCOUNT_ID`: Your Facebook Ad Account ID (without the 'act_' prefix)
+   - `FB_ACCESS_TOKEN`: Your Facebook Marketing API access token
+   - Optional: `FB_APP_ID` and `FB_APP_SECRET` for some advanced features
+
+### Running the Campaign Creation Script
+
+Execute the script to create a new campaign:
+
+```bash
+npx ts-node src/create-campaign.ts
+```
+
+The script will:
+- Create a new campaign with CONVERSIONS objective (paused by default)
+- Create an ad set with targeting parameters (US, ages 25-45, technology interests)
+- Create an ad with sample creative content
+
+All components are created in PAUSED state for safety. Review them in Facebook Ads Manager before activating.
+
+### Customizing the Campaign
+
+To customize the campaign, edit the `src/create-campaign.ts` file and modify:
+
+- Campaign configuration: Objective, name, special ad categories
+- Ad Set configuration: Budget, targeting options, optimization goals
+- Ad Creative: Title, body text, image URL, call to action, etc.
+
+### Listing Existing Campaigns
+
+To view your existing campaigns:
+
+```bash
+npm run list-campaigns
+```
+
+### Managing API Access Tokens
+
+To generate a token URL:
+
+```bash
+npm run generate-token-url
+```
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| FB_ACCESS_TOKEN | Facebook Marketing API access token | Yes |
+| FB_AD_ACCOUNT_ID | Facebook Ad Account ID | Yes |
+| FB_APP_ID | Facebook App ID | No |
+| FB_APP_SECRET | Facebook App Secret | No |

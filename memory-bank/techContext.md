@@ -3,7 +3,7 @@
 ## Technologies Used
 1. **Node.js**: Runtime environment (v18 or higher)
 2. **TypeScript**: Programming language
-3. **Facebook Marketing API**: Advertising platform integration
+3. **Facebook Graph API**: Direct API integration with Facebook API v22.0
 4. **Cursor IDE**: Development environment
 5. **MCP Framework**: Cursor IDE integration framework
 
@@ -14,7 +14,6 @@
    - TypeScript Support
 
 2. **Dependencies**
-   - facebook-nodejs-business-sdk: ^18.0.0
    - dotenv: ^16.0.0
    - @types/node: ^20.0.0
    - typescript: ^5.0.0
@@ -28,8 +27,8 @@
 
 ## Technical Constraints
 1. **API Limitations**
-   - Facebook Marketing API rate limits
-   - API version compatibility
+   - Facebook Graph API rate limits
+   - API version compatibility (v22.0)
    - Authentication requirements
 
 2. **Environment Requirements**
@@ -46,7 +45,6 @@
 ```json
 {
   "dependencies": {
-    "facebook-nodejs-business-sdk": "^18.0.0",
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
