@@ -39,7 +39,17 @@ Add Meta MCP to your Cursor MCP configuration at `~/.cursor/mcp.json`:
 }
 ```
 
-### 2. Set Required Environment Variables
+### 2. Find Your Ad Account ID
+
+If you don't know your Facebook Ad Account ID, you can use the included tool to list all available ad accounts:
+
+```bash
+npx meta-mcp list-accounts
+```
+
+This tool only requires the `FB_ACCESS_TOKEN` environment variable and will display all ad accounts you have access to. You can then use one of the displayed account IDs in your configuration.
+
+### 3. Set Required Environment Variables
 
 You can set environment variables either through the MCP configuration as shown above, or by creating a `.env` file in your project:
 
@@ -134,6 +144,26 @@ const adResult = await mcp.call('meta-mcp.createAd', {
 });
 ```
 
+#### Find Available Ad Accounts
+
+```
+Get a list of all my Facebook ad accounts
+```
+
+The AI will generate:
+
+```javascript
+const accounts = await mcp.call('meta-mcp.getAvailableAdAccounts', {});
+
+// Display available accounts
+accounts.forEach(account => {
+  console.log(`Account ID: ${account.id}`);
+  console.log(`Name: ${account.name}`);
+  console.log(`Status: ${account.account_status === 1 ? 'Active' : 'Inactive'}`);
+  console.log('---');
+});
+```
+
 ### Campaign Management
 
 You can also manage your campaigns with natural language:
@@ -170,6 +200,7 @@ Pause the Facebook ad with ID 123456789
 | `pauseCampaign` | Pause an active campaign |
 | `pauseAdSet` | Pause an active ad set |
 | `pauseAd` | Pause an active ad |
+| `getAvailableAdAccounts` | Get all ad accounts available to the user |
 
 ## Troubleshooting
 
