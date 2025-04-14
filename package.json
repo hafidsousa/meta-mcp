@@ -1,6 +1,6 @@
 {
   "name": "meta-mcp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "MCP Server for Facebook Marketing API integration",
   "main": "dist/server.js",
   "types": "dist/index.d.ts",
