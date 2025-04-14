@@ -1,8 +1,12 @@
+# This workflow is no longer needed as publishing is now handled by semantic-release
+# in the .github/workflows/release.yml file.
+# Keeping this file for reference only.
+
 name: Publish Package to npm
 
 on:
   release:
-    types: [created]
+    types: [never]  # Disabled
 
 jobs:
   build:
