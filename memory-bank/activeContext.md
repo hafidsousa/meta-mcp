@@ -1,48 +1,42 @@
 # Facebook Marketing MCP Server - Active Context
 
 ## Current Work Focus
-1. Core MCP server implementation
-2. Facebook Marketing API integration
-3. Development environment setup
-4. Testing framework setup
-5. Documentation development
+1. Ad account discovery and management functionality
+2. Optimizing environment variable requirements
+3. MCP tools integration
+4. Facebook Marketing API integration
+5. Documentation updates
 
 ## Recent Changes
-1. Created project structure
-2. Set up TypeScript configuration
-3. Implemented basic MCP server framework
-4. Added Facebook Marketing API dependencies
-5. Created comprehensive memory bank documentation
+1. Made FB_APP_ID and FB_APP_SECRET optional when using MCP tools
+2. Added functionality to list all available ad accounts
+3. Implemented getAvailableAdAccounts method
+4. Added a command-line tool to list available ad accounts
+5. Created MCP utility functions for better ad account management
+6. Added package.json exports for additional ad account retrieval methods
 
 ## Next Steps
-1. Implement core MCP commands:
-   - createCampaign
-   - createAdSet
-   - createAd
-   - getAdSets
-   - getAds
-   - pauseCampaign
-   - pauseAdSet
-   - pauseAd
-
-2. Set up testing environment
-3. Implement error handling
-4. Add comprehensive API documentation
-5. Create example usage scenarios
+1. Implement the two additional ad account methods:
+   - getOwnedAdAccounts
+   - getClientAdAccounts
+2. Enhance error handling for ad account listing
+3. Add type definitions for ad account response objects
+4. Expand documentation with ad account management examples
+5. Implement additional MCP tools integration
 
 ## Active Decisions
-1. Using TypeScript for type safety
-2. Implementing modular architecture
-3. Following MCP framework guidelines
-4. Using environment variables for configuration
-5. Implementing comprehensive error handling
+1. Making some environment variables optional to simplify setup
+2. Using TypeScript for type safety
+3. Implementing ad account discovery features
+4. Using MCP tools for enhanced functionality
+5. Storing minimal required credentials
 
 ## Current Considerations
-1. API rate limiting implementation
-2. Error handling strategy
-3. Testing approach
-4. Documentation structure
-5. Security measures
+1. Additional ad account management features
+2. Business account integration
+3. Improved error handling for API rate limits
+4. Enhanced documentation for ad account discovery
+5. Additional MCP tool integrations
 
 ## Development Status
 ```mermaid
@@ -53,27 +47,28 @@ gantt
     Project Setup           :done, 2024-05-13, 1d
     Memory Bank Creation    :done, 2024-05-13, 1d
     section Implementation
-    Core MCP Server        :active, 2024-05-14, 2d
-    API Integration        :2024-05-16, 3d
-    Command Implementation :2024-05-19, 4d
+    Core MCP Server        :done, 2024-05-14, 2d
+    API Integration        :done, 2024-05-16, 3d
+    Command Implementation :active, 2024-05-19, 4d
+    Ad Account Management  :active, 2024-05-20, 2d
     section Testing
     Unit Tests            :2024-05-23, 2d
     Integration Tests     :2024-05-25, 2d
     section Documentation
-    API Documentation     :2024-05-27, 2d
+    API Documentation     :active, 2024-05-27, 2d
     Usage Examples        :2024-05-29, 2d
 ```
 
 ## Priority Tasks
-1. Complete core MCP server implementation
-2. Implement Facebook Marketing API integration
-3. Set up testing environment
-4. Create comprehensive documentation
-5. Implement error handling
+1. Complete ad account management functions
+2. Implement remaining MCP exports
+3. Update documentation with new features
+4. Add comprehensive error handling
+5. Create usage examples for ad account discovery
 
 ## Open Questions
-1. Specific error handling requirements
-2. Testing strategy details
-3. Documentation format preferences
-4. Additional MCP commands needed
-5. Performance optimization requirements 
+1. Additional business account management features needed?
+2. Performance considerations for larger ad account lists?
+3. Additional MCP tools to integrate?
+4. Best practices for credential management?
+5. Additional error handling requirements? 

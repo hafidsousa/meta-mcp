@@ -44,12 +44,7 @@ export class FacebookMarketingClient {
         ErrorCodes.INVALID_CREDENTIALS
       );
     }
-    if (!config.appSecret?.trim()) {
-      throw new FacebookMarketingError(
-        'App secret is required',
-        ErrorCodes.INVALID_CREDENTIALS
-      );
-    }
+    // App secret is optional when using MCP tools
     if (!config.adAccountId?.trim()) {
       throw new FacebookMarketingError(
         'Ad account ID is required',
@@ -248,6 +243,25 @@ export class FacebookMarketingClient {
     } catch (error) {
       console.error('Error pausing ad:', error);
       return false;
+    }
+  }
+
+  /**
+   * Gets all available ad accounts for the current user
+   * @returns Promise with list of ad accounts
+   */
+  async getAvailableAdAccounts(): Promise<any[]> {
+    try {
+      // Use the Facebook API to get ad accounts associated with the current user
+      const result = await this.api.call<{ data: any[] }>('GET', '/me/adaccounts', {
+        fields: ['id', 'name', 'account_status', 'amount_spent', 'currency']
+      });
+      
+      return result.data || [];
+    } catch (error) {
+      console.error('Error getting ad accounts:', error);
+      this.handleApiError(error, 'get ad accounts');
+      return [];
     }
   }
 } 

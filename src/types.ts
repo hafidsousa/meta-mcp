@@ -11,10 +11,10 @@ import { Campaign, AdSet, Ad } from 'facebook-nodejs-business-sdk';
 export interface FacebookConfig {
   /** Access token with ads_management permission */
   accessToken: string;
-  /** Facebook App ID from developer console */
-  appId: string;
-  /** Facebook App Secret from developer console */
-  appSecret: string;
+  /** Facebook App ID from developer console (optional when using MCP tools) */
+  appId?: string;
+  /** Facebook App Secret from developer console (optional when using MCP tools) */
+  appSecret?: string;
   /** Facebook Ad Account ID (without 'act_' prefix) */
   adAccountId: string;
 }
@@ -135,5 +135,6 @@ declare module 'facebook-nodejs-business-sdk' {
     createAd(config: AdConfig & { account_id: string }): Promise<Ad>;
     getAdSets(ids: string[]): Promise<AdSet[]>;
     getAds(ids: string[]): Promise<Ad[]>;
+    call<T>(method: string, path: string, params?: Record<string, any>): Promise<T>;
   }
 } 

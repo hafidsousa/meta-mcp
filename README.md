@@ -30,9 +30,9 @@ Add Meta MCP to your Cursor MCP configuration at `~/.cursor/mcp.json`:
       "args": ["meta-mcp"],
       "env": {
         "FB_ACCESS_TOKEN": "your_access_token_here",
-        "FB_APP_ID": "your_app_id_here",
-        "FB_APP_SECRET": "your_app_secret_here",
-        "FB_AD_ACCOUNT_ID": "your_ad_account_id_here"
+        "FB_AD_ACCOUNT_ID": "your_ad_account_id_here",
+        "FB_APP_ID": "your_app_id_here (optional with MCP tools)",
+        "FB_APP_SECRET": "your_app_secret_here (optional with MCP tools)"
       }
     }
   }
@@ -46,9 +46,10 @@ You can set environment variables either through the MCP configuration as shown 
 ```env
 # Facebook API Credentials
 FB_ACCESS_TOKEN=your_access_token_here
+FB_AD_ACCOUNT_ID=your_ad_account_id_here
+# Optional with MCP tools
 FB_APP_ID=your_app_id_here
 FB_APP_SECRET=your_app_secret_here
-FB_AD_ACCOUNT_ID=your_ad_account_id_here
 ```
 
 ## Using in Cursor

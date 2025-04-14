@@ -35,12 +35,12 @@
 2. **Environment Requirements**
    - Node.js version
    - Facebook API credentials
-   - Cursor IDE version
+   - Cursor IDE compatibility
 
 3. **Security Constraints**
    - Secure credential management
    - API token handling
-   - Environment variable usage
+   - Minimal required credentials
 
 ## Dependencies
 ```json
@@ -68,8 +68,10 @@
 
 ## Configuration Requirements
 1. **Environment Variables**
-   - FACEBOOK_ACCESS_TOKEN
-   - FACEBOOK_AD_ACCOUNT_ID
+   - FB_ACCESS_TOKEN (required)
+   - FB_AD_ACCOUNT_ID (required)
+   - FB_APP_ID (optional with MCP tools)
+   - FB_APP_SECRET (optional with MCP tools)
 
 2. **Cursor IDE Configuration**
    - MCP server registration
@@ -83,9 +85,24 @@
    - Ad set operations
    - Ad creation
    - Analytics retrieval
+   - Ad account discovery
 
 2. **Cursor IDE MCP**
    - Command interface
    - Response handling
    - Error management
-   - Configuration integration 
+   - Configuration integration
+   - Ad account management tools
+
+## MCP Tools
+1. **Ad Account Management**
+   - List available ad accounts
+   - Get owned ad accounts
+   - Get client ad accounts
+
+2. **Command-line Utilities**
+   - list-accounts: Tool to view available ad accounts
+
+3. **Utility Functions**
+   - fetchAdAccounts: Get ad accounts for a user
+   - extractAdAccountId: Clean ad account ID format 

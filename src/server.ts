@@ -45,4 +45,8 @@ export const pauseAdSet = async (params: { adSetId: string }) => {
 
 export const pauseAd = async (params: { adId: string }) => {
   return client.pauseAd(params.adId);
+};
+
+export const getAvailableAdAccounts = async () => {
+  return client.getAvailableAdAccounts();
 }; 

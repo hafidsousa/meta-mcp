@@ -14,7 +14,8 @@
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
     "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "list-accounts": "ts-node src/list-accounts.ts"
   },
   "keywords": [
     "facebook",
@@ -69,6 +70,16 @@
         "type": "string",
         "description": "Facebook Ad Account ID",
         "required": true
+      },
+      "FB_APP_ID": {
+        "type": "string",
+        "description": "Facebook App ID (optional when using MCP tools)",
+        "required": false
+      },
+      "FB_APP_SECRET": {
+        "type": "string",
+        "description": "Facebook App Secret (optional when using MCP tools)",
+        "required": false
       }
     },
     "exports": {
@@ -146,6 +157,10 @@
             "description": "ID of the ad to pause"
           }
         }
+      },
+      "getAvailableAdAccounts": {
+        "description": "Get all available ad accounts for the current user",
+        "parameters": {}
       }
     }
   }
