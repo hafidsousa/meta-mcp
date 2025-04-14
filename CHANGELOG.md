@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/hafidsousa/meta-mcp/compare/v1.1.0...v1.2.0) (2025-04-14)
+
+
+### Features
+
+* Enhance Facebook Marketing MCP Server with direct Graph API integration ([773e2e0](https://github.com/hafidsousa/meta-mcp/commit/773e2e0287acae3dcc4fb753441f7d0f82692f37))
+
 # [1.1.0](https://github.com/hafidsousa/meta-mcp/compare/v1.0.0...v1.1.0) (2025-04-14)
 
 
