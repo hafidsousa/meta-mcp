@@ -1,0 +1,145 @@
+{
+  "name": "meta-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for Facebook Marketing API integration",
+  "main": "dist/server.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "facebook",
+    "marketing",
+    "ads",
+    "mcp",
+    "cursor"
+  ],
+  "author": "Hafid Sousa",
+  "license": "MIT",
+  "dependencies": {
+    "facebook-nodejs-business-sdk": "^18.0.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hafidsousa/meta-mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/hafidsousa/meta-mcp/issues"
+  },
+  "mcp": {
+    "type": "server",
+    "transport": "stdio",
+    "env": {
+      "FB_ACCESS_TOKEN": {
+        "type": "string",
+        "description": "Facebook Marketing API access token",
+        "required": true
+      },
+      "FB_AD_ACCOUNT_ID": {
+        "type": "string",
+        "description": "Facebook Ad Account ID",
+        "required": true
+      }
+    },
+    "exports": {
+      "createCampaign": {
+        "description": "Create a new Facebook ad campaign",
+        "parameters": {
+          "config": {
+            "type": "object",
+            "description": "Campaign configuration",
+            "required": true
+          }
+        }
+      },
+      "createAdSet": {
+        "description": "Create a new ad set within a campaign",
+        "parameters": {
+          "config": {
+            "type": "object",
+            "description": "Ad set configuration",
+            "required": true
+          }
+        }
+      },
+      "createAd": {
+        "description": "Create a new ad within an ad set",
+        "parameters": {
+          "config": {
+            "type": "object",
+            "description": "Ad configuration",
+            "required": true
+          }
+        }
+      },
+      "getAdSets": {
+        "description": "Get all ad sets for a campaign",
+        "parameters": {
+          "campaignId": {
+            "type": "string",
+            "description": "ID of the campaign"
+          }
+        }
+      },
+      "getAds": {
+        "description": "Get all ads for an ad set",
+        "parameters": {
+          "adSetId": {
+            "type": "string",
+            "description": "ID of the ad set"
+          }
+        }
+      },
+      "pauseCampaign": {
+        "description": "Pause an active campaign",
+        "parameters": {
+          "campaignId": {
+            "type": "string",
+            "description": "ID of the campaign to pause"
+          }
+        }
+      },
+      "pauseAdSet": {
+        "description": "Pause an active ad set",
+        "parameters": {
+          "adSetId": {
+            "type": "string",
+            "description": "ID of the ad set to pause"
+          }
+        }
+      },
+      "pauseAd": {
+        "description": "Pause an active ad",
+        "parameters": {
+          "adId": {
+            "type": "string",
+            "description": "ID of the ad to pause"
+          }
+        }
+      }
+    }
+  }
+} 

@@ -1,0 +1,81 @@
+# Facebook Marketing MCP Server - Project Intelligence
+
+## Architecture Patterns
+
+### MCP Server Structure
+The project follows a modular architecture with clearly separated concerns:
+- Core MCP server handling communication with Cursor IDE
+- Operation handlers for specific Facebook Marketing API operations
+- Configuration management for credentials and environment
+- Response formatters for standardized API responses
+
+### Code Organization
+- `/src`: Source code directory
+  - `/api`: Facebook Marketing API integration
+  - `/mcp`: MCP server implementation
+  - `/config`: Configuration management
+  - `/handlers`: Operation handlers
+  - `/utils`: Utility functions
+  - `/types`: TypeScript type definitions
+
+## Implementation Guidelines
+
+### TypeScript Usage
+- Use strict typing for all functions and interfaces
+- Define clear interfaces for API requests and responses
+- Document all public functions and interfaces
+- Use enums for static options like campaign objectives
+- Leverage generics for reusable components
+
+### Error Handling
+- Use structured error responses
+- Categorize errors (API, validation, server)
+- Provide detailed error messages
+- Implement graceful fallbacks
+- Log errors with appropriate severity
+
+### Testing Strategy
+- Unit tests for individual components
+- Integration tests for API communication
+- Mock tests for Facebook API
+- End-to-end tests for MCP commands
+- Performance tests for critical paths
+
+## Best Practices
+
+### Facebook Marketing API
+- Respect API rate limits
+- Handle authentication errors gracefully
+- Validate input before API calls
+- Implement retry logic for transient errors
+- Cache responses when appropriate
+
+### MCP Commands
+- Validate command parameters
+- Provide clear response structures
+- Handle timeouts appropriately
+- Implement progress reporting for long operations
+- Support cancellation for long-running processes
+
+### Security Considerations
+- Store credentials in environment variables
+- Sanitize error messages
+- Validate all user inputs
+- Implement appropriate access controls
+- Ensure secure credential transmission
+
+## Work Patterns
+
+### Development Workflow
+- Implement core functionality first
+- Add comprehensive testing
+- Document all components
+- Review code for security and performance
+- Create usage examples
+
+### Documentation Focus
+- Clear API documentation
+- Comprehensive usage examples
+- Detailed configuration guide
+- Troubleshooting information
+- Security best practices 
