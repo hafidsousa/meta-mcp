@@ -3,7 +3,7 @@ name: Create Release
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   release:
@@ -42,7 +42,7 @@ jobs:
           semantic_version: 19
           branches: |
             [
-              'master'
+              'main'
             ]
           extra_plugins: |
             @semantic-release/changelog

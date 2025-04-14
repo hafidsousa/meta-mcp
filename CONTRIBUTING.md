@@ -50,7 +50,7 @@ consistent parameter structure
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes and commit using the conventional commit format
 4. Push to your fork (`git push origin feature/amazing-feature`) 
-5. Open a Pull Request against the `master` branch
+5. Open a Pull Request against the `main` branch
 
 ## Development Setup
 
