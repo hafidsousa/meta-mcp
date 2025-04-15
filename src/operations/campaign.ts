@@ -41,7 +41,7 @@ export async function createCampaign(
     }
 
     // Convert camelCase to snake_case for API params using humps
-    const params = humps.decamelizeKeys({
+    const paramsWithUndefined = humps.decamelizeKeys({
       name: config.name,
       objective: config.objective,
       status: config.status,
@@ -59,6 +59,14 @@ export async function createCampaign(
       promotedObject: config.promotedObject,
       isSkadnetworkAttribution: config.isSkadnetworkAttribution
     });
+    
+    // Filter out undefined values
+    const params = Object.entries(paramsWithUndefined).reduce((acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, any>);
     
     const response = await apiRequest<{id: string}>(
       baseUrl,

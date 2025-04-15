@@ -64,6 +64,7 @@
     "semantic-release": "^24.2.3",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.0.0"
   },
   "files": [

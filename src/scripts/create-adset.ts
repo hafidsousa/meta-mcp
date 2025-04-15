@@ -34,7 +34,7 @@ const adSetConfig: AdSetConfig = {
   status: 'PAUSED', // Options: 'ACTIVE', 'PAUSED'
   
   // Budget settings (use either dailyBudget or lifetimeBudget, not both)
-  dailyBudget: 5000, // $50.00 (in cents)
+  // dailyBudget: 5000, // $50.00 (in cents) - Removed because the campaign has CBO enabled
   // lifetimeBudget: 100000, // $1,000.00 (in cents) - Don't use with dailyBudget
   
   // Schedule settings
@@ -46,20 +46,21 @@ const adSetConfig: AdSetConfig = {
   // bidAmount: 1000, // $10.00 (in cents) - Only use with bidStrategy 'LOWEST_COST_WITH_BID_CAP' or 'COST_CAP'
   
   // Billing and optimization
-  billingEvent: 'IMPRESSIONS', // Options: 'IMPRESSIONS', 'LINK_CLICKS', 'APP_INSTALLS', etc.
-  optimizationGoal: 'LEAD_GENERATION', // What to optimize for
+  billingEvent: 'IMPRESSIONS', // Switched back to IMPRESSIONS billing
+  optimizationGoal: 'REACH', // Using REACH which is often available for new accounts
   
   // Attribution settings - controls how conversions are attributed
-  attributionSpec: [
-    {
-      eventType: 'CLICK',
-      windowDays: 7
-    },
-    {
-      eventType: 'VIEW',
-      windowDays: 1
-    }
-  ],
+  // Removing the attributionSpec that was causing errors
+  // attributionSpec: [
+  //   {
+  //     eventType: 'CLICK',
+  //     windowDays: 7
+  //   },
+  //   {
+  //     eventType: 'VIEW',
+  //     windowDays: 1
+  //   }
+  // ],
   
   // Pacing type - how budget is spent throughout the day
   pacingType: ['standard'],
