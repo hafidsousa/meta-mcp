@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/hafidsousa/meta-mcp/compare/v1.2.0...v1.3.0) (2025-04-15)
+
+
+### Features
+
+* Update package dependencies and enhance Facebook Marketing API client ([ba0d1e1](https://github.com/hafidsousa/meta-mcp/commit/ba0d1e14a372da101b6f43deee5845af4a51208c))
+
 # [1.2.0](https://github.com/hafidsousa/meta-mcp/compare/v1.1.0...v1.2.0) (2025-04-14)
 
 
