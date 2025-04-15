@@ -1,3 +1,6 @@
+// Re-export what clients will need
+export * from './tools';
+
 export * from './client';
 export * from './config';
 export * from './types';

@@ -260,6 +260,40 @@ We've completed a significant refactoring of the codebase to improve maintainabi
 - Best practices for credential management
 - **Modular architecture implementation and benefits**
 - **Code organization strategies for maintainability**
+- **Tool schema standardization for better AI integration**
+
+## MCP Tool Schema Standards
+
+We've established the following standards for MCP tool schemas:
+
+1. **Comprehensive Documentation**
+   - Each parameter must have a clear, detailed description
+   - Include examples in descriptions where helpful (e.g., "format: '23843xxxxxxxx'")
+   - Explain relationships between parameters (e.g., "Alternative to dailyBudget - don't use both")
+   - Add usage guidance in descriptions where appropriate
+
+2. **Complete Type Information**
+   - Use proper JSON Schema types for all parameters
+   - Include `enum` arrays for parameters with fixed value sets
+   - Specify `minimum` and `maximum` values where applicable
+   - Add `default` values where they exist
+
+3. **Nested Object Structure**
+   - Fully document nested objects with all available properties
+   - Structure complex objects with proper indentation for readability
+   - Follow camelCase convention for all property names
+
+4. **Parameter Organization**
+   - Group related parameters together in the schema
+   - Order parameters from most essential to most specialized
+   - Required parameters should be listed first when possible
+
+5. **Schema Validation**
+   - Use `required` arrays to specify mandatory fields
+   - Add validation properties appropriate to the field type
+   - Include pattern constraints where applicable
+
+These standards ensure our tool schemas are both human-readable and machine-processable, providing clear guidance to developers and AI assistants using our MCP tools.
 
 ## Development Status
 ```mermaid
@@ -278,26 +312,28 @@ gantt
     SDK Removal            :done, 2024-05-22, 1d
     Code Reorganization    :done, 2024-05-23, 1d
     Modular Architecture   :done, 2024-05-24, 2d
+    Tool Schema Standards  :done, 2024-05-26, 1d
     section Testing
-    Unit Tests            :active, 2024-05-26, 2d
-    Integration Tests     :2024-05-28, 2d
+    Unit Tests            :active, 2024-05-27, 2d
+    Integration Tests     :2024-05-29, 2d
     section Documentation
-    API Documentation     :active, 2024-05-28, 2d
-    Usage Examples        :2024-05-30, 2d
+    API Documentation     :active, 2024-05-29, 2d
+    Usage Examples        :2024-05-31, 2d
 ```
 
 ## Priority Tasks
 
 1. **Update unit tests for new modular structure**
 2. **Verify all modules work correctly with integration tests**
-3. Verify Cursor integration working with MCP SDK
-4. Test all tools through Cursor interface
-5. Complete ad account management functions
-6. Implement remaining MCP exports
-7. Update documentation with new features
-8. Add comprehensive error handling
-9. Create usage examples for ad account discovery
-10. Finalize removal of any remaining SDK references
+3. **Update all remaining tool schemas to follow the new standards**
+4. Verify Cursor integration working with MCP SDK
+5. Test all tools through Cursor interface
+6. Complete ad account management functions
+7. Implement remaining MCP exports
+8. Update documentation with new features
+9. Add comprehensive error handling
+10. Create usage examples for ad account discovery
+11. Finalize removal of any remaining SDK references
 
 ## Open Questions
 

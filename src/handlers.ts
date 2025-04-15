@@ -161,6 +161,16 @@ export const callToolHandler = async (request: any) => {
         result = await client.updateAdSet(args.adSetId, args.config as AdSetConfig);
         break;
       
+      case "updateCampaign":
+        if (!args.config) {
+          throw new Error("Missing required parameter: config");
+        }
+        if (typeof args.campaignId !== 'string') {
+          throw new Error("Missing or invalid required parameter: campaignId");
+        }
+        result = await client.updateCampaign(args.campaignId, args.config as CampaignConfig);
+        break;
+      
       default:
         return {
           content: [{ type: "text", text: `Unknown tool: ${name}` }],

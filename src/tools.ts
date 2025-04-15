@@ -11,10 +11,122 @@ export const CAMPAIGN_TOOL: Tool = {
         type: "object",
         description: "Campaign configuration object containing essential settings for the campaign",
         properties: {
-          name: { type: "string", description: "Campaign name - should be descriptive for easy identification" },
-          objective: { type: "string", description: "Campaign objective (e.g., 'CONVERSIONS', 'MESSAGES', 'REACH', 'TRAFFIC', 'APP_INSTALLS', 'VIDEO_VIEWS')" },
-          status: { type: "string", description: "Campaign status ('ACTIVE' to launch immediately, 'PAUSED' to set up but not activate)" },
-          specialAdCategories: { type: "array", description: "Special ad categories if applicable (e.g., ['HOUSING', 'CREDIT', 'EMPLOYMENT', 'ISSUES_ELECTIONS_POLITICS'])" }
+          name: { 
+            type: "string", 
+            description: "Campaign name - should be descriptive for easy identification (e.g., 'Summer-Sale-2025' or 'Product-Launch-Q2')" 
+          },
+          objective: { 
+            type: "string", 
+            description: "Campaign objective - what you want to achieve with this campaign",
+            enum: [
+              "APP_INSTALLS", "BRAND_AWARENESS", "CONVERSIONS", "EVENT_RESPONSES", 
+              "LEAD_GENERATION", "LINK_CLICKS", "LOCAL_AWARENESS", "MESSAGES", 
+              "OUTCOME_AWARENESS", "OUTCOME_ENGAGEMENT", "OUTCOME_LEADS",
+              "OUTCOME_SALES", "OUTCOME_TRAFFIC", "OUTCOME_APP_PROMOTION",
+              "PAGE_LIKES", "POST_ENGAGEMENT", "REACH", "STORE_VISITS", "VIDEO_VIEWS"
+            ]
+          },
+          status: { 
+            type: "string", 
+            description: "Campaign status ('ACTIVE' to launch immediately, 'PAUSED' to set up but not activate)",
+            enum: ["ACTIVE", "PAUSED", "DELETED", "ARCHIVED"],
+            default: "PAUSED"
+          },
+          specialAdCategories: { 
+            type: "array", 
+            description: "Special ad categories for regulated content - required by Facebook for certain industries", 
+            items: {
+              type: "string",
+              enum: ["NONE", "EMPLOYMENT", "HOUSING", "CREDIT", "ISSUES_ELECTIONS_POLITICS"]
+            },
+            default: ["NONE"]
+          },
+          spendCap: {
+            type: "number",
+            description: "Maximum amount to spend on the campaign in cents (e.g., 1000000 = $10,000.00) - prevents overspending"
+          },
+          dailyBudget: {
+            type: "number",
+            description: "Daily budget in cents (e.g., 5000 = $50.00) - Alternative to lifetimeBudget, don't use both"
+          },
+          lifetimeBudget: {
+            type: "number",
+            description: "Total budget in cents for the campaign's lifetime (e.g., 100000 = $1,000.00) - Alternative to dailyBudget"
+          },
+          startTime: {
+            type: "string",
+            description: "When to start running the campaign in ISO 8601 format (e.g., '2025-06-15T12:00:00+0000')"
+          },
+          stopTime: {
+            type: "string",
+            description: "When to stop running the campaign in ISO 8601 format - Required if using lifetimeBudget"
+          },
+          bidStrategy: {
+            type: "string",
+            description: "Bidding strategy for the campaign - Controls how your budget is spent",
+            enum: [
+              "LOWEST_COST_WITHOUT_CAP", 
+              "LOWEST_COST_WITH_BID_CAP", 
+              "COST_CAP", 
+              "LOWEST_COST_WITH_MIN_ROAS"
+            ],
+            default: "LOWEST_COST_WITHOUT_CAP"
+          },
+          campaignBudgetOptimization: {
+            type: "boolean",
+            description: "Enables Campaign Budget Optimization to automatically distribute budget across ad sets",
+            default: false
+          },
+          minRoasTargetValue: {
+            type: "number",
+            description: "Minimum ROAS (Return on Ad Spend) target value - Only use with bidStrategy LOWEST_COST_WITH_MIN_ROAS"
+          },
+          adLabels: {
+            type: "array",
+            description: "Labels to organize and categorize the campaign",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string", description: "Label name for reference" }
+              },
+              required: ["name"]
+            }
+          },
+          boostedObjectId: {
+            type: "string",
+            description: "ID of the boosted object (e.g., post, page) - Used for boost-type campaigns"
+          },
+          promotedObject: {
+            type: "object",
+            description: "Additional specifications for certain campaign objectives",
+            properties: {
+              pageId: { 
+                type: "string", 
+                description: "Facebook Page ID associated with this campaign" 
+              },
+              applicationId: { 
+                type: "string", 
+                description: "App ID for app promotion campaigns" 
+              },
+              objectStoreUrl: { 
+                type: "string", 
+                description: "App store URL for app installs" 
+              },
+              pixelId: { 
+                type: "string", 
+                description: "Facebook Pixel ID for conversion tracking" 
+              },
+              offerId: { 
+                type: "string", 
+                description: "Offer ID for offer promotions" 
+              }
+            }
+          },
+          isSkadnetworkAttribution: {
+            type: "boolean",
+            description: "Enable SKAdNetwork attribution for iOS app campaigns",
+            default: false
+          }
         },
         required: ["name", "objective"]
       }
@@ -28,7 +140,20 @@ export const GET_CAMPAIGNS_TOOL: Tool = {
   description: "Gets all campaigns for the ad account. Use this to retrieve existing campaigns for monitoring, editing, or to get campaign IDs needed for creating ad sets. Returns an array of campaign objects with their IDs, names, status, and other details.",
   inputSchema: {
     type: "object",
-    properties: {}
+    properties: {
+      limit: { 
+        type: "number", 
+        description: "Maximum number of campaigns to return (default: 25, max: 100)",
+        minimum: 1,
+        maximum: 100
+      },
+      status: { 
+        type: "string", 
+        description: "Filter campaigns by status - only returns campaigns with this status",
+        enum: ["ACTIVE", "PAUSED", "DELETED", "ARCHIVED", "ALL"],
+        default: "ALL"
+      }
+    }
   }
 };
 
@@ -38,7 +163,10 @@ export const PAUSE_CAMPAIGN_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      campaignId: { type: "string", description: "Campaign ID (format: '23843xxxxxxxx') - obtain this from getCampaigns response" }
+      campaignId: { 
+        type: "string", 
+        description: "Campaign ID (format: '23843xxxxxxxx') - obtain this from getCampaigns response" 
+      }
     },
     required: ["campaignId"]
   }
@@ -66,7 +194,7 @@ export const ADSET_TOOL: Tool = {
           status: { 
             type: "string", 
             description: "Ad set status ('ACTIVE' to launch immediately, 'PAUSED' to set up but not activate)", 
-            enum: ["ACTIVE", "PAUSED"],
+            enum: ["ACTIVE", "PAUSED", "DELETED", "ARCHIVED"],
             default: "PAUSED"
           },
           dailyBudget: { 
@@ -122,6 +250,46 @@ export const ADSET_TOOL: Tool = {
                     type: "array", 
                     description: "Country codes (e.g., ['US', 'CA'] for United States and Canada)",
                     items: { type: "string" }
+                  },
+                  regions: {
+                    type: "array",
+                    description: "Region IDs for targeting specific states or provinces",
+                    items: { 
+                      type: "object",
+                      properties: {
+                        key: { type: "string", description: "Region key (e.g., '3847' for California)" }
+                      },
+                      required: ["key"]
+                    }
+                  },
+                  cities: {
+                    type: "array",
+                    description: "City IDs for targeting specific cities",
+                    items: { 
+                      type: "object",
+                      properties: {
+                        key: { type: "string", description: "City key (e.g., '2418779' for New York)" },
+                        radius: { type: "number", description: "Radius around city in miles" },
+                        distance_unit: { 
+                          type: "string", 
+                          description: "Unit for radius measurement",
+                          enum: ["mile", "kilometer"],
+                          default: "mile" 
+                        }
+                      },
+                      required: ["key"]
+                    }
+                  },
+                  zips: {
+                    type: "array",
+                    description: "ZIP/Postal codes for detailed geographic targeting",
+                    items: { 
+                      type: "object",
+                      properties: {
+                        key: { type: "string", description: "ZIP/Postal code" }
+                      },
+                      required: ["key"]
+                    }
                   }
                 }
               },
@@ -157,13 +325,61 @@ export const ADSET_TOOL: Tool = {
                   required: ["id"]
                 }
               },
+              behaviors: {
+                type: "array",
+                description: "Behavior-based targeting. Targets users based on purchase behavior, device usage, etc.",
+                items: {
+                  type: "object",
+                  properties: {
+                    id: { type: "string", description: "Facebook behavior ID" },
+                    name: { type: "string", description: "Optional name for reference" }
+                  },
+                  required: ["id"]
+                }
+              },
+              locales: {
+                type: "array",
+                description: "Language/locale targeting to reach people who use Facebook in specific languages",
+                items: { type: "number", description: "Facebook locale ID (e.g., 6 for English)" }
+              },
+              exclusions: {
+                type: "object",
+                description: "Audiences to exclude from targeting",
+                properties: {
+                  interests: {
+                    type: "array",
+                    description: "Interest categories to exclude",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string", description: "Facebook interest ID to exclude" },
+                        name: { type: "string", description: "Optional name for reference" }
+                      },
+                      required: ["id"]
+                    }
+                  },
+                  behaviors: {
+                    type: "array",
+                    description: "Behaviors to exclude",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string", description: "Facebook behavior ID to exclude" },
+                        name: { type: "string", description: "Optional name for reference" }
+                      },
+                      required: ["id"]
+                    }
+                  }
+                }
+              },
               publisherPlatforms: { 
                 type: "array", 
                 description: "Platforms to show ads on (e.g., ['facebook', 'instagram'])",
                 items: { 
                   type: "string", 
                   enum: ["facebook", "instagram", "audience_network", "messenger"] 
-                }
+                },
+                default: ["facebook", "instagram"]
               },
               facebookPositions: { 
                 type: "array", 
@@ -171,7 +387,8 @@ export const ADSET_TOOL: Tool = {
                 items: { 
                   type: "string", 
                   enum: ["feed", "right_hand_column", "instant_article", "marketplace", "video_feeds", "story", "search", "instream_video"] 
-                }
+                },
+                default: ["feed"]
               },
               instagramPositions: { 
                 type: "array", 
@@ -179,6 +396,23 @@ export const ADSET_TOOL: Tool = {
                 items: { 
                   type: "string", 
                   enum: ["stream", "story", "explore", "reels"] 
+                },
+                default: ["stream"]
+              },
+              devicePlatforms: {
+                type: "array",
+                description: "Target specific devices",
+                items: {
+                  type: "string",
+                  enum: ["mobile", "desktop"]
+                }
+              },
+              userOs: {
+                type: "array",
+                description: "Target specific operating systems",
+                items: {
+                  type: "string",
+                  enum: ["iOS", "Android", "Windows", "macOS"]
                 }
               }
             }
@@ -192,11 +426,26 @@ export const ADSET_TOOL: Tool = {
           attributionSpec: { 
             type: "array", 
             description: "Attribution settings for conversion tracking",
-            items: { type: "object" }
+            items: { 
+              type: "object",
+              properties: {
+                eventType: { 
+                  type: "string", 
+                  description: "Type of event to attribute", 
+                  enum: ["CLICK", "VIEW", "IMPRESSION"] 
+                },
+                windowDays: { 
+                  type: "number", 
+                  description: "Number of days after event to attribute conversions",
+                  enum: [1, 7, 28]
+                }
+              }
+            }
           },
           destinationType: { 
             type: "string", 
-            description: "Destination type for the ad" 
+            description: "Destination type for the ad",
+            enum: ["WEBSITE", "APP", "MESSENGER", "WHATSAPP", "INSTAGRAM_PROFILE", "FACEBOOK_EVENT"]
           },
           adSchedules: { 
             type: "array", 
@@ -207,6 +456,20 @@ export const ADSET_TOOL: Tool = {
                 days: { type: "array", items: { type: "number" }, description: "Days of week (0-6, where 0 is Sunday)" },
                 hours: { type: "array", items: { type: "number" }, description: "Hours (0-23)" },
                 minutes: { type: "array", items: { type: "number" }, description: "Minutes (0, 15, 30, 45)" }
+              }
+            }
+          },
+          promotedObject: {
+            type: "object",
+            description: "Object being promoted by this ad set (app, page, event, etc.)",
+            properties: {
+              pageId: { type: "string", description: "Facebook Page ID for page promotion" },
+              applicationId: { type: "string", description: "App ID for app promotion" },
+              pixelId: { type: "string", description: "Pixel ID for conversion tracking" },
+              customEventType: { 
+                type: "string", 
+                description: "Type of custom conversion event to optimize for",
+                enum: ["COMPLETE_REGISTRATION", "ADD_TO_CART", "PURCHASE", "LEAD", "VIEW_CONTENT"]
               }
             }
           }
@@ -224,7 +487,10 @@ export const GET_ADSETS_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      campaignId: { type: "string", description: "Campaign ID (format: '23843xxxxxxxx') - obtain this from getCampaigns response" }
+      campaignId: { 
+        type: "string", 
+        description: "Campaign ID (format: '23843xxxxxxxx') - obtain this from getCampaigns response" 
+      }
     },
     required: ["campaignId"]
   }
@@ -236,8 +502,18 @@ export const GET_ACCOUNT_ADSETS_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      limit: { type: "number", description: "Optional limit on number of ad sets to return (e.g., 10, 25, 50)" },
-      status: { type: "string", description: "Optional status filter ('ACTIVE', 'PAUSED', 'ARCHIVED', etc.) to only show ad sets with that status" }
+      limit: { 
+        type: "number", 
+        description: "Maximum number of ad sets to return (default: 25, max: 100)",
+        minimum: 1,
+        maximum: 100
+      },
+      status: { 
+        type: "string", 
+        description: "Filter ad sets by status - only returns ad sets with this status",
+        enum: ["ACTIVE", "PAUSED", "ARCHIVED", "ALL"],
+        default: "ALL"
+      }
     }
   }
 };
@@ -248,7 +524,10 @@ export const GET_ADSET_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      adSetId: { type: "string", description: "Ad set ID (format: '23843xxxxxxxx') - obtain this from createAdSet response or getAdSets" }
+      adSetId: { 
+        type: "string", 
+        description: "Ad set ID (format: '23843xxxxxxxx') - obtain this from createAdSet response or getAdSets" 
+      }
     },
     required: ["adSetId"]
   }
@@ -260,7 +539,10 @@ export const PAUSE_ADSET_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      adSetId: { type: "string", description: "Ad set ID (format: '23843xxxxxxxx') - obtain this from getAdSets response" }
+      adSetId: { 
+        type: "string", 
+        description: "Ad set ID (format: '23843xxxxxxxx') - obtain this from getAdSets response" 
+      }
     },
     required: ["adSetId"]
   }
@@ -272,19 +554,117 @@ export const UPDATE_ADSET_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      adSetId: { type: "string", description: "Ad set ID (format: '23843xxxxxxxx') - obtain this from getAdSets response" },
+      adSetId: { 
+        type: "string", 
+        description: "Ad set ID (format: '23843xxxxxxxx') - obtain this from getAdSets response" 
+      },
       config: { 
         type: "object", 
         description: "Ad set configuration with fields to update. Only include fields you want to change.",
         properties: {
-          name: { type: "string", description: "New ad set name" },
-          status: { type: "string", description: "New status ('ACTIVE' or 'PAUSED')" },
-          dailyBudget: { type: "number", description: "New daily budget in cents (e.g., 5000 = $50.00)" },
-          lifetimeBudget: { type: "number", description: "New lifetime budget in cents for the entire ad set" },
-          bidAmount: { type: "number", description: "New bid amount in cents for auction-based bidding" },
-          targeting: { type: "object", description: "New targeting specifications to replace current targeting" },
-          optimizationGoal: { type: "string", description: "New optimization goal (e.g., 'REACH', 'IMPRESSIONS', 'LINK_CLICKS')" },
-          billingEvent: { type: "string", description: "New billing event determining how you're charged (e.g., 'IMPRESSIONS', 'LINK_CLICKS')" }
+          name: { 
+            type: "string", 
+            description: "New ad set name - update to make it more descriptive or reflect changes in targeting" 
+          },
+          status: { 
+            type: "string", 
+            description: "New status - used to pause or reactivate an ad set",
+            enum: ["ACTIVE", "PAUSED"],
+            default: "PAUSED"
+          },
+          dailyBudget: { 
+            type: "number", 
+            description: "New daily budget in cents (e.g., 5000 = $50.00) - increase or decrease based on performance" 
+          },
+          lifetimeBudget: { 
+            type: "number", 
+            description: "New lifetime budget in cents for the entire ad set - alternative to dailyBudget" 
+          },
+          bidAmount: { 
+            type: "number", 
+            description: "New bid amount in cents for auction-based bidding - adjust based on competition and performance" 
+          },
+          bidStrategy: { 
+            type: "string", 
+            description: "New bid strategy for the ad set - changes how Facebook optimizes your spending",
+            enum: ["LOWEST_COST_WITHOUT_CAP", "LOWEST_COST_WITH_BID_CAP", "COST_CAP"]
+          },
+          targeting: { 
+            type: "object", 
+            description: "New targeting specifications to replace current targeting - completely replaces existing targeting", 
+            properties: {
+              geoLocations: {
+                type: "object",
+                description: "Geographic targeting settings",
+                properties: {
+                  countries: { 
+                    type: "array", 
+                    description: "Country codes (e.g., ['US', 'CA'] for United States and Canada)",
+                    items: { type: "string" }
+                  }
+                }
+              },
+              ageMin: { 
+                type: "number", 
+                description: "Minimum age (13-65)", 
+                minimum: 13, 
+                maximum: 65
+              },
+              ageMax: { 
+                type: "number", 
+                description: "Maximum age (13-65)", 
+                minimum: 13, 
+                maximum: 65
+              },
+              genders: { 
+                type: "array", 
+                description: "Gender targeting: [1] = male only, [2] = female only, [1,2] = all genders",
+                items: { type: "number", enum: [1, 2] }
+              },
+              interests: { 
+                type: "array", 
+                description: "Interest-based targeting. Each interest needs Facebook's interest ID.",
+                items: { 
+                  type: "object", 
+                  properties: {
+                    id: { type: "string", description: "Facebook interest ID" },
+                    name: { type: "string", description: "Optional name for reference" }
+                  },
+                  required: ["id"]
+                }
+              }
+            }
+          },
+          optimizationGoal: { 
+            type: "string", 
+            description: "New optimization goal - what you want to optimize the ad set for",
+            enum: ["NONE", "APP_INSTALLS", "IMPRESSIONS", "LINK_CLICKS", "REACH", 
+                   "CONVERSIONS", "PAGE_LIKES", "LEAD_GENERATION", "LANDING_PAGE_VIEWS"]
+          },
+          billingEvent: { 
+            type: "string", 
+            description: "New billing event determining how you're charged",
+            enum: ["APP_INSTALLS", "IMPRESSIONS", "LINK_CLICKS", "NONE", 
+                   "PAGE_LIKES", "POST_ENGAGEMENT", "THRUPLAY"]
+          },
+          startTime: { 
+            type: "string", 
+            description: "New start time in ISO 8601 format (e.g., '2025-06-15T12:00:00+0000') - reschedules when ads begin" 
+          },
+          endTime: { 
+            type: "string", 
+            description: "New end time in ISO 8601 format - updates when the ad set will stop running" 
+          },
+          pacingType: { 
+            type: "array", 
+            description: "New pacing type for budget distribution throughout the day",
+            items: { type: "string", enum: ["standard", "day_parting"] }
+          },
+          attributionSpec: { 
+            type: "array", 
+            description: "New attribution settings for conversion tracking",
+            items: { type: "object" }
+          }
         }
       }
     },
@@ -303,9 +683,130 @@ export const AD_TOOL: Tool = {
         type: "object",
         description: "Ad configuration containing the creative elements and settings",
         properties: {
-          name: { type: "string", description: "Ad name - should describe the creative for easy identification" },
-          adsetId: { type: "string", description: "Parent ad set ID (format: '23843xxxxxxxx') - obtain this from createAdSet response or getAdSets" },
-          creative: { type: "object", description: "Ad creative configuration containing images/videos, text, headlines, descriptions, and call-to-action buttons" }
+          name: { 
+            type: "string", 
+            description: "Ad name - should describe the creative for easy identification (e.g., 'Product-Image-Blue-Desktop')" 
+          },
+          adsetId: { 
+            type: "string", 
+            description: "Parent ad set ID (format: '23843xxxxxxxx') - obtain this from createAdSet response or getAdSets" 
+          },
+          status: { 
+            type: "string", 
+            description: "Ad status - determines whether the ad will run immediately",
+            enum: ["ACTIVE", "PAUSED", "DELETED", "ARCHIVED"],
+            default: "PAUSED"
+          },
+          bidAmount: { 
+            type: "number", 
+            description: "Optional bid amount in cents - overrides the ad set bid if specified" 
+          },
+          creative: { 
+            type: "object", 
+            description: "Ad creative configuration containing the visual and text elements",
+            properties: {
+              name: { 
+                type: "string", 
+                description: "Creative name for reference and organization" 
+              },
+              title: { 
+                type: "string", 
+                description: "Ad headline - keep under 40 characters for best results. This is the main text users will see." 
+              },
+              body: { 
+                type: "string", 
+                description: "Ad body text - keep under 125 characters for best results. Describes your offer in more detail." 
+              },
+              imageUrl: { 
+                type: "string", 
+                description: "URL of the image to use - must be publicly accessible. Recommended size: 1200x628 pixels." 
+              },
+              videoUrl: { 
+                type: "string", 
+                description: "URL of the video to use - must be publicly accessible. Alternative to imageUrl for video ads." 
+              },
+              linkUrl: { 
+                type: "string", 
+                description: "Landing page URL where users will go when clicking the ad" 
+              },
+              callToAction: { 
+                type: "string", 
+                description: "Call to action button text",
+                enum: [
+                  "BOOK_TRAVEL", "CONTACT_US", "DONATE", "DOWNLOAD", "GET_OFFER", 
+                  "GET_QUOTE", "LEARN_MORE", "PLAY_GAME", "SHOP_NOW", "SIGN_UP", 
+                  "SUBSCRIBE", "WATCH_MORE"
+                ],
+                default: "LEARN_MORE"
+              },
+              urlTags: { 
+                type: "string", 
+                description: "Additional URL parameters for tracking (e.g., 'utm_source=facebook&utm_medium=cpc')" 
+              },
+              format: { 
+                type: "string", 
+                description: "Creative format - determines the ad layout",
+                enum: ["single_image", "carousel", "video", "slideshow"],
+                default: "single_image" 
+              },
+              objectStorySpec: { 
+                type: "object", 
+                description: "Page post ad specifications - for creating ads from Page posts", 
+                properties: {
+                  pageId: { 
+                    type: "string", 
+                    description: "Facebook Page ID that will publish the ad" 
+                  },
+                  instagramActorId: { 
+                    type: "string", 
+                    description: "Instagram account ID for Instagram placement ads" 
+                  },
+                  linkData: { 
+                    type: "object", 
+                    description: "Link ad specifications" 
+                  },
+                  photoData: { 
+                    type: "object", 
+                    description: "Photo ad specifications" 
+                  },
+                  videoData: { 
+                    type: "object", 
+                    description: "Video ad specifications" 
+                  }
+                }
+              }
+            },
+            required: ["title", "body", "linkUrl"]
+          },
+          trackingSpecs: { 
+            type: "array", 
+            description: "Additional tracking specifications for advanced conversion tracking",
+            items: { type: "object" }
+          },
+          conversionDomain: { 
+            type: "string", 
+            description: "Domain for conversion attribution - must match a verified domain in your Business Manager" 
+          },
+          adlabels: { 
+            type: "array", 
+            description: "Labels to categorize and organize ads",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string", description: "Label name" }
+              },
+              required: ["name"]
+            }
+          },
+          displaySequence: { 
+            type: "number", 
+            description: "Display sequence within campaign - controls the order of ads" 
+          },
+          engagementAudience: { 
+            type: "boolean", 
+            description: "Whether to create an engagement custom audience from this ad",
+            default: false
+          }
         },
         required: ["name", "adsetId", "creative"]
       }
@@ -320,7 +821,10 @@ export const GET_ADS_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      adSetId: { type: "string", description: "Ad set ID (format: '23843xxxxxxxx') - obtain this from getAdSets response" }
+      adSetId: { 
+        type: "string", 
+        description: "Ad set ID (format: '23843xxxxxxxx') - obtain this from getAdSets response" 
+      }
     },
     required: ["adSetId"]
   }
@@ -332,8 +836,18 @@ export const GET_ACCOUNT_ADS_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      limit: { type: "number", description: "Optional limit on number of ads to return (e.g., 10, 25, 50)" },
-      status: { type: "string", description: "Optional status filter ('ACTIVE', 'PAUSED', 'ARCHIVED', etc.) to only show ads with that status" }
+      limit: { 
+        type: "number", 
+        description: "Maximum number of ads to return (default: 25, max: 100)",
+        minimum: 1,
+        maximum: 100
+      },
+      status: { 
+        type: "string", 
+        description: "Filter ads by status - only returns ads with this status",
+        enum: ["ACTIVE", "PAUSED", "DELETED", "ARCHIVED", "ALL"],
+        default: "ALL"
+      }
     }
   }
 };
@@ -344,7 +858,10 @@ export const GET_AD_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      adId: { type: "string", description: "Ad ID (format: '23843xxxxxxxx') - obtain this from createAd response or getAds" }
+      adId: { 
+        type: "string", 
+        description: "Ad ID (format: '23843xxxxxxxx') - obtain this from createAd response or getAds" 
+      }
     },
     required: ["adId"]
   }
@@ -356,7 +873,10 @@ export const PAUSE_AD_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      adId: { type: "string", description: "Ad ID (format: '23843xxxxxxxx') - obtain this from getAds response" }
+      adId: { 
+        type: "string", 
+        description: "Ad ID (format: '23843xxxxxxxx') - obtain this from getAds response" 
+      }
     },
     required: ["adId"]
   }
@@ -368,14 +888,91 @@ export const UPDATE_AD_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      adId: { type: "string", description: "Ad ID (format: '23843xxxxxxxx') - obtain this from getAds response" },
+      adId: { 
+        type: "string", 
+        description: "Ad ID (format: '23843xxxxxxxx') - obtain this from getAds response" 
+      },
       config: { 
         type: "object", 
         description: "Ad configuration with fields to update. Only include fields you want to change.",
         properties: {
-          name: { type: "string", description: "New ad name for identification" },
-          status: { type: "string", description: "New ad status ('ACTIVE' or 'PAUSED')" },
-          creative: { type: "object", description: "New ad creative configuration to replace current creative elements" }
+          name: { 
+            type: "string", 
+            description: "New ad name for identification - update to better describe the ad creative or purpose" 
+          },
+          status: { 
+            type: "string", 
+            description: "New ad status - used to pause or activate the ad",
+            enum: ["ACTIVE", "PAUSED", "DELETED", "ARCHIVED"],
+            default: "PAUSED"
+          },
+          bidAmount: { 
+            type: "number", 
+            description: "New bid amount in cents - allows adjusting bid at the ad level for better performance" 
+          },
+          creative: { 
+            type: "object", 
+            description: "New ad creative configuration to replace current creative elements - completely replaces existing creative",
+            properties: {
+              name: { 
+                type: "string", 
+                description: "Creative name for reference and organization" 
+              },
+              title: { 
+                type: "string", 
+                description: "Ad headline - keep under 40 characters for best results" 
+              },
+              body: { 
+                type: "string", 
+                description: "Ad body text - keep under 125 characters for best results" 
+              },
+              imageUrl: { 
+                type: "string", 
+                description: "URL of the image to use - must be publicly accessible" 
+              },
+              videoUrl: { 
+                type: "string", 
+                description: "URL of the video to use - must be publicly accessible" 
+              },
+              linkUrl: { 
+                type: "string", 
+                description: "Landing page URL where users will go when clicking the ad" 
+              },
+              callToAction: { 
+                type: "string", 
+                description: "Call to action button text",
+                enum: [
+                  "BOOK_TRAVEL", "CONTACT_US", "DONATE", "DOWNLOAD", "GET_OFFER", 
+                  "GET_QUOTE", "LEARN_MORE", "PLAY_GAME", "SHOP_NOW", "SIGN_UP", 
+                  "SUBSCRIBE", "WATCH_MORE"
+                ]
+              },
+              urlTags: { 
+                type: "string", 
+                description: "Additional URL parameters for tracking (e.g., 'utm_source=facebook&utm_medium=cpc')" 
+              }
+            }
+          },
+          trackingSpecs: { 
+            type: "array", 
+            description: "New tracking specifications for this ad - replaces existing tracking",
+            items: { type: "object" }
+          },
+          conversionDomain: { 
+            type: "string", 
+            description: "New domain for conversion attribution - must match a verified domain in your Business Manager" 
+          },
+          adlabels: { 
+            type: "array", 
+            description: "New labels to categorize and organize ads - replaces existing labels",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string", description: "Label name" }
+              },
+              required: ["name"]
+            }
+          }
         }
       }
     },
@@ -390,6 +987,118 @@ export const GET_ACCOUNTS_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {}
+  }
+};
+
+export const UPDATE_CAMPAIGN_TOOL: Tool = {
+  name: "updateCampaign",
+  description: "Updates an existing campaign with new configuration values. Use this to modify campaign settings such as name, status, budget, objectives or other campaign-level parameters. Only the fields you include in the config will be updated.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      campaignId: {
+        type: "string",
+        description: "Campaign ID to update (format: '23843xxxxxxxx') - obtain this from getCampaigns response"
+      },
+      config: {
+        type: "object",
+        description: "Configuration object containing fields to update. Only include fields you want to change.",
+        properties: {
+          name: {
+            type: "string",
+            description: "New name for the campaign"
+          },
+          status: {
+            type: "string",
+            description: "Updated campaign status",
+            enum: ["ACTIVE", "PAUSED", "ARCHIVED"],
+            examples: ["ACTIVE"]
+          },
+          objective: {
+            type: "string",
+            description: "Campaign objective - determines optimization goals and ad formats available",
+            enum: [
+              "APP_INSTALLS", 
+              "BRAND_AWARENESS", 
+              "CONVERSIONS", 
+              "EVENT_RESPONSES", 
+              "LEAD_GENERATION", 
+              "LINK_CLICKS", 
+              "LOCAL_AWARENESS", 
+              "MESSAGES", 
+              "OFFER_CLAIMS", 
+              "PAGE_LIKES", 
+              "POST_ENGAGEMENT", 
+              "PRODUCT_CATALOG_SALES", 
+              "REACH", 
+              "STORE_VISITS", 
+              "VIDEO_VIEWS"
+            ]
+          },
+          specialAdCategories: {
+            type: "array",
+            description: "Special ad categories that apply to this campaign (required for certain regulated industries)",
+            items: {
+              type: "string",
+              enum: [
+                "NONE", 
+                "EMPLOYMENT", 
+                "HOUSING", 
+                "CREDIT", 
+                "ISSUES_ELECTIONS_POLITICS", 
+                "ONLINE_GAMBLING_AND_GAMING"
+              ]
+            },
+            default: ["NONE"]
+          },
+          spendCap: {
+            type: "number",
+            description: "Maximum amount to spend on this campaign over its lifetime (in account currency)",
+            minimum: 1
+          },
+          dailyBudget: {
+            type: "number",
+            description: "Daily budget limit for the campaign (in account currency) - cannot be used with lifetimeBudget",
+            minimum: 1
+          },
+          lifetimeBudget: {
+            type: "number",
+            description: "Total budget for the entire campaign duration (in account currency) - cannot be used with dailyBudget",
+            minimum: 1
+          },
+          startTime: {
+            type: "string",
+            description: "Start date/time for campaign in ISO 8601 format (e.g., '2023-12-31T12:30:00-08:00')"
+          },
+          stopTime: {
+            type: "string",
+            description: "End date/time for campaign in ISO 8601 format (e.g., '2023-12-31T12:30:00-08:00')"
+          },
+          bidStrategy: {
+            type: "string",
+            description: "Strategy to use for bidding",
+            enum: [
+              "LOWEST_COST_WITHOUT_CAP", 
+              "LOWEST_COST_WITH_BID_CAP", 
+              "COST_CAP"
+            ],
+            default: "LOWEST_COST_WITHOUT_CAP"
+          },
+          buyingType: {
+            type: "string",
+            description: "Campaign buying type",
+            enum: ["AUCTION", "RESERVED"],
+            default: "AUCTION"
+          },
+          isSkadnetworkAttribution: {
+            type: "boolean",
+            description: "Enable SKAdNetwork attribution for iOS app campaigns",
+            default: false
+          }
+        }
+      }
+    },
+    required: ["campaignId", "config"]
   }
 };
 
@@ -411,4 +1120,5 @@ export const getAllTools = (): Tool[] => [
   GET_ACCOUNT_ADSETS_TOOL,
   GET_ADSET_TOOL,
   UPDATE_ADSET_TOOL,
+  UPDATE_CAMPAIGN_TOOL,
 ]; 

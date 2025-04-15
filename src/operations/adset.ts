@@ -4,8 +4,6 @@
 
 import { AdSet, AdSetConfig, AdSetResponse } from '../types';
 import { apiRequest, handleApiError } from '../utils/api';
-import { mergeConfig } from '../config';
-import { DEFAULT_ADSET_CONFIG } from '../config';
 
 // Define the AdSetConfigType interface to be compatible with Partial<AdSetConfig>
 interface AdSetConfigType {

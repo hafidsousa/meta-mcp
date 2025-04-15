@@ -110,16 +110,23 @@
 - Standardized function signatures across modules
 - Consistent parameter ordering (baseUrl, adAccountId, accessToken, etc.)
 - Updated exports in index.ts to include all new modules
+- Enhanced AdSet creation with proper targeting object serialization
+- Standardized MCP tool schemas with comprehensive documentation:
+  - Updated ADSET_TOOL schema with detailed parameter descriptions
+  - Added proper type information, enums, and validation
+  - Structured complex nested objects with complete documentation
+  - Established schema standards for all future tool development
 
 ## Next Milestone Goals
 
 1. Update tests for new modular architecture
-2. Complete test coverage for all core functionality
-3. Implement remaining campaign management tools
-4. Enhance error reporting and validation
-5. Update documentation with examples
-6. Performance optimization for high-volume usage
-7. Ensure compatibility with latest SDK version
+2. Update remaining tool schemas to follow new standards
+3. Complete test coverage for all core functionality
+4. Implement remaining campaign management tools
+5. Enhance error reporting and validation
+6. Update documentation with examples
+7. Performance optimization for high-volume usage
+8. Ensure compatibility with latest SDK version
 
 ## Testing Status
 - Unit Tests: Basic tests implemented, need updating for new architecture
