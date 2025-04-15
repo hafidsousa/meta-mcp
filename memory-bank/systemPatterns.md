@@ -8,6 +8,7 @@ The system follows a modular architecture with clear separation of concerns:
 4. **Operation Handlers**: Processes specific advertising operations
 5. **Response Formatters**: Formats API responses for Cursor IDE
 6. **Case Conversion Layer**: Manages camelCase to snake_case conversion for API compatibility
+7. **Documentation Generation System**: Creates documentation from TypeScript types
 
 ## Key Technical Decisions
 1. **TypeScript Implementation**: Ensures type safety and better development experience
@@ -18,6 +19,7 @@ The system follows a modular architecture with clear separation of concerns:
 6. **Direct API Integration**: Using native fetch for Facebook Graph API calls without SDK dependencies
 7. **File Size Constraints**: Module files kept under 300 lines for maintainability
 8. **Case Conversion Pattern**: Using humps library for reliable camelCase to snake_case conversion
+9. **Type-Driven Documentation**: Generating documentation from TypeScript types
 
 ## Design Patterns
 1. **Command Pattern**: For handling different advertising operations
@@ -27,18 +29,22 @@ The system follows a modular architecture with clear separation of concerns:
 5. **Strategy Pattern**: For different operation implementations
 6. **Facade Pattern**: Client class provides a simplified interface to the subsystems
 7. **Transformer Pattern**: For converting between camelCase and snake_case in API interactions
+8. **Generator Pattern**: For creating documentation from TypeScript types
 
 ## Code Organization
 1. **src/utils/api.ts**: API request utilities and error handling
-2. **src/operations/campaign.ts**: Campaign-specific operations
-3. **src/operations/adset.ts**: Ad Set specific operations
-4. **src/operations/ad.ts**: Ad specific operations
-5. **src/operations/account.ts**: Account management operations
-6. **src/client.ts**: Main client facade that delegates to operation modules
-7. **src/config.ts**: Configuration and environment management
-8. **src/tools.ts**: Tool schema definitions for MCP integration
-9. **src/handlers.ts**: MCP request handlers implementation
-10. **src/server.ts**: Slim main file that sets up and runs the MCP server
+2. **src/utils/docgen.ts**: Documentation generation utilities
+3. **src/operations/campaign.ts**: Campaign-specific operations
+4. **src/operations/adset.ts**: Ad Set specific operations
+5. **src/operations/ad.ts**: Ad specific operations
+6. **src/operations/account.ts**: Account management operations
+7. **src/client.ts**: Main client facade that delegates to operation modules
+8. **src/config.ts**: Configuration and environment management
+9. **src/tools/**: Tool schema definitions for MCP integration organized by entity type
+10. **src/handlers.ts**: MCP request handlers implementation
+11. **src/server.ts**: Slim main file that sets up and runs the MCP server
+12. **src/scripts/generate-docs.ts**: JSON documentation generator
+13. **src/scripts/generate-markdown-docs.ts**: Markdown documentation generator
 
 ## Component Relationships
 ```mermaid
@@ -56,6 +62,9 @@ graph TD
     K[Configuration] --> D
     K --> E & F & G & H
     L[Tool Definitions] --> B
+    M[TypeScript Types] --> N[Documentation Generator]
+    N --> O[JSON Documentation]
+    O --> P[Markdown Documentation]
 ```
 
 ## Data Flow
@@ -66,6 +75,17 @@ graph TD
 5. API Utilities make API call to Facebook
 6. Response processed and returned to Client
 7. Formatted response returned to Cursor IDE
+
+## Documentation Generation Pattern
+1. **Type-Driven Approach**: Documentation is generated directly from TypeScript types
+2. **Two-Stage Process**:
+   - First stage: TypeScript types to JSON schema
+   - Second stage: JSON schema to readable Markdown
+3. **Organization by Domain**: Tools are grouped by entity type (campaigns, ad sets, ads, accounts)
+4. **Example Generation**: Automatic generation of example code snippets based on tool name and parameters
+5. **Hierarchy**: Index file links to domain-specific documentation files
+6. **Parameter Details**: Detailed documentation of each parameter including type, required status, and description
+7. **Complex Object Documentation**: Nested documentation of complex parameter objects
 
 ## Case Conversion Pattern
 1. **Consistent Interface**: Client accepts camelCase parameters (industry standard in JS/TS)

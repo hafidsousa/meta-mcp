@@ -10,6 +10,37 @@ When working with Ad Sets, AI assistants should:
 3. Always validate parameters against the current API specification as they may change over time
 4. Be aware that the reference URL uses 'ad-campaign' which refers to ad sets in the Facebook Marketing API
 
+## Targeting Requirements
+
+### ⚠️ Valid IDs Required
+
+All targeting parameters that use IDs (interests, behaviors, regions, cities, etc.) **MUST** reference valid Facebook IDs. Using invalid IDs will cause API errors.
+
+#### Critical ID-based targeting parameters:
+
+| Parameter | Description | ID Validation |
+|-----------|-------------|---------------|
+| `interests` | Interest-based targeting | Must use valid Facebook interest taxonomy IDs |
+| `behaviors` | Behavior-based targeting | Must use valid Facebook behavior taxonomy IDs |
+| `regions` | Geographic region targeting | Must use valid Facebook region keys |
+| `cities` | City-based targeting | Must use valid Facebook city keys |
+| `custom_audiences` | Custom audience targeting | Must use valid audience IDs from your account |
+
+#### How to obtain valid IDs:
+
+1. Use the Facebook Ads Manager UI to identify valid IDs
+2. Use the [Facebook Marketing API targeting search endpoints](https://developers.facebook.com/docs/marketing-api/audiences/reference/targeting-search/)
+3. Start with basic targeting and add more complex parameters gradually
+4. Create test campaigns with minimal budget to validate targeting
+
+#### Common error scenarios:
+
+- Error code #100: "Param targeting[interests][0][id] must be a valid interest id"
+- Invalid location keys causing targeting errors
+- Invalid demographic parameters causing validation failures
+
+To avoid these errors, always verify IDs before using them in production campaigns.
+
 ## Implemented Endpoints
 
 Our Meta MCP implementation includes the following ad set-related endpoints:

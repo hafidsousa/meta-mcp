@@ -24,7 +24,12 @@ The project follows a modular architecture with clearly separated concerns:
   - `/utils`: Utility functions
     - `/api.ts`: API request utilities and error handling
   - `/config.ts`: Configuration management, environment loading, and logging utilities
-  - `/tools.ts`: MCP tool schema definitions
+  - `/tools`: MCP tool schema definitions organized by entity type
+    - `/index.ts`: Tool exports and getAllTools function
+    - `/campaign.ts`: Campaign tool definitions
+    - `/adset.ts`: Ad set tool definitions
+    - `/ad.ts`: Ad tool definitions
+    - `/account.ts`: Account tool definitions
   - `/handlers.ts`: MCP request handlers implementation
   - `/types.ts`: TypeScript type definitions
   - `/client.ts`: Main client facade

@@ -435,13 +435,20 @@ export interface CampaignResponse {
 
 export interface AdSetResponse {
   /** Created ad set ID */
-  id: string;
+  id?: string;
   /** Whether creation was successful */
   success: boolean;
   /** Ad set data if creation was successful */
   data?: AdSet;
   /** Error details if creation failed */
-  error?: any;
+  error?: {
+    /** Error message */
+    message: string;
+    /** Error code */
+    code: string;
+    /** Detailed error information from Facebook API */
+    details?: Record<string, any> | null;
+  };
 }
 
 export interface AdResponse {

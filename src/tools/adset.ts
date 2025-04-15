@@ -145,11 +145,11 @@ export const ADSET_TOOL: Tool = {
               },
               interests: { 
                 type: "array", 
-                description: "Interest-based targeting. Each interest needs Facebook's interest ID.",
+                description: "Interest-based targeting. Each interest needs an official Facebook interest ID obtained from the Facebook Marketing API. These IDs cannot be arbitrary values and must be valid IDs recognized by Facebook.",
                 items: { 
                   type: "object", 
                   properties: {
-                    id: { type: "string", description: "Facebook interest ID" },
+                    id: { type: "string", description: "Official Facebook interest ID from Marketing API. Cannot be arbitrary values." },
                     name: { type: "string", description: "Optional name for reference" }
                   },
                   required: ["id"]
@@ -157,11 +157,11 @@ export const ADSET_TOOL: Tool = {
               },
               behaviors: {
                 type: "array",
-                description: "Behavior-based targeting. Targets users based on purchase behavior, device usage, etc.",
+                description: "Behavior-based targeting. Targets users based on purchase behavior, device usage, etc. Must use official behavior IDs from Facebook Marketing API, not arbitrary values.",
                 items: {
                   type: "object",
                   properties: {
-                    id: { type: "string", description: "Facebook behavior ID" },
+                    id: { type: "string", description: "Official Facebook behavior ID from Marketing API. Cannot be arbitrary values." },
                     name: { type: "string", description: "Optional name for reference" }
                   },
                   required: ["id"]
@@ -169,8 +169,8 @@ export const ADSET_TOOL: Tool = {
               },
               locales: {
                 type: "array",
-                description: "Language/locale targeting to reach people who use Facebook in specific languages",
-                items: { type: "number", description: "Facebook locale ID (e.g., 6 for English)" }
+                description: "Language/locale targeting to reach people who use Facebook in specific languages. Must use official locale IDs from Facebook Marketing API.",
+                items: { type: "number", description: "Official Facebook locale ID (e.g., 6 for English). Must be obtained from Facebook's API, not arbitrary values." }
               },
               exclusions: {
                 type: "object",
@@ -178,11 +178,11 @@ export const ADSET_TOOL: Tool = {
                 properties: {
                   interests: {
                     type: "array",
-                    description: "Interest categories to exclude",
+                    description: "Interest categories to exclude. Must use official interest IDs from Facebook's Marketing API, not arbitrary values.",
                     items: {
                       type: "object",
                       properties: {
-                        id: { type: "string", description: "Facebook interest ID to exclude" },
+                        id: { type: "string", description: "Official Facebook interest ID to exclude. Cannot be arbitrary values." },
                         name: { type: "string", description: "Optional name for reference" }
                       },
                       required: ["id"]
@@ -190,11 +190,11 @@ export const ADSET_TOOL: Tool = {
                   },
                   behaviors: {
                     type: "array",
-                    description: "Behaviors to exclude",
+                    description: "Behaviors to exclude. Must use official behavior IDs from Facebook's Marketing API, not arbitrary values.",
                     items: {
                       type: "object",
                       properties: {
-                        id: { type: "string", description: "Facebook behavior ID to exclude" },
+                        id: { type: "string", description: "Official Facebook behavior ID to exclude. Cannot be arbitrary values." },
                         name: { type: "string", description: "Optional name for reference" }
                       },
                       required: ["id"]
@@ -436,7 +436,7 @@ export const UPDATE_ADSET_TOOL: Tool = {
           },
           targeting: { 
             type: "object", 
-            description: "New targeting specifications to replace current targeting - completely replaces existing targeting", 
+            description: "Targeting specifications for this ad set",
             properties: {
               geoLocations: {
                 type: "object",
@@ -446,6 +446,46 @@ export const UPDATE_ADSET_TOOL: Tool = {
                     type: "array", 
                     description: "Country codes (e.g., ['US', 'CA'] for United States and Canada)",
                     items: { type: "string" }
+                  },
+                  regions: {
+                    type: "array",
+                    description: "Region IDs for targeting specific states or provinces",
+                    items: { 
+                      type: "object",
+                      properties: {
+                        key: { type: "string", description: "Region key (e.g., '3847' for California)" }
+                      },
+                      required: ["key"]
+                    }
+                  },
+                  cities: {
+                    type: "array",
+                    description: "City IDs for targeting specific cities",
+                    items: { 
+                      type: "object",
+                      properties: {
+                        key: { type: "string", description: "City key (e.g., '2418779' for New York)" },
+                        radius: { type: "number", description: "Radius around city in miles" },
+                        distance_unit: { 
+                          type: "string", 
+                          description: "Unit for radius measurement",
+                          enum: ["mile", "kilometer"],
+                          default: "mile" 
+                        }
+                      },
+                      required: ["key"]
+                    }
+                  },
+                  zips: {
+                    type: "array",
+                    description: "ZIP/Postal codes for detailed geographic targeting",
+                    items: { 
+                      type: "object",
+                      properties: {
+                        key: { type: "string", description: "ZIP/Postal code" }
+                      },
+                      required: ["key"]
+                    }
                   }
                 }
               },
@@ -468,14 +508,104 @@ export const UPDATE_ADSET_TOOL: Tool = {
               },
               interests: { 
                 type: "array", 
-                description: "Interest-based targeting. Each interest needs Facebook's interest ID.",
+                description: "Interest-based targeting. Each interest needs an official Facebook interest ID obtained from the Facebook Marketing API. These IDs cannot be arbitrary values.",
                 items: { 
                   type: "object", 
                   properties: {
-                    id: { type: "string", description: "Facebook interest ID" },
+                    id: { type: "string", description: "Official Facebook interest ID from Marketing API. Cannot be arbitrary values." },
                     name: { type: "string", description: "Optional name for reference" }
                   },
                   required: ["id"]
+                }
+              },
+              behaviors: {
+                type: "array",
+                description: "Behavior-based targeting. Must use official behavior IDs from Facebook Marketing API, not arbitrary values.",
+                items: {
+                  type: "object",
+                  properties: {
+                    id: { type: "string", description: "Official Facebook behavior ID from Marketing API. Cannot be arbitrary values." },
+                    name: { type: "string", description: "Optional name for reference" }
+                  },
+                  required: ["id"]
+                }
+              },
+              locales: {
+                type: "array",
+                description: "Languages to target. Must use official locale IDs from Facebook Marketing API.",
+                items: { type: "number", description: "Official Facebook locale ID (e.g., 6 for English). Must be obtained from Facebook's API." }
+              },
+              exclusions: {
+                type: "object",
+                description: "Audiences to exclude from targeting",
+                properties: {
+                  interests: {
+                    type: "array",
+                    description: "Interest categories to exclude. Must use official interest IDs from Facebook's Marketing API, not arbitrary values.",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string", description: "Official Facebook interest ID to exclude. Cannot be arbitrary values." },
+                        name: { type: "string", description: "Optional name for reference" }
+                      },
+                      required: ["id"]
+                    }
+                  },
+                  behaviors: {
+                    type: "array",
+                    description: "Behaviors to exclude. Must use official behavior IDs from Facebook's Marketing API, not arbitrary values.",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string", description: "Official Facebook behavior ID to exclude. Cannot be arbitrary values." },
+                        name: { type: "string", description: "Optional name for reference" }
+                      },
+                      required: ["id"]
+                    }
+                  }
+                }
+              },
+              publisherPlatforms: { 
+                type: "array", 
+                description: "Platforms to show ads on (e.g., ['facebook', 'instagram'])",
+                items: { 
+                  type: "string", 
+                  enum: ["facebook", "instagram", "audience_network", "messenger"] 
+                },
+                default: ["facebook", "instagram"]
+              },
+              facebookPositions: { 
+                type: "array", 
+                description: "Positions on Facebook (e.g., ['feed', 'right_hand_column'])",
+                items: { 
+                  type: "string", 
+                  enum: ["feed", "right_hand_column", "instant_article", "marketplace", "video_feeds", "story", "search", "instream_video"] 
+                },
+                default: ["feed"]
+              },
+              instagramPositions: { 
+                type: "array", 
+                description: "Positions on Instagram (e.g., ['stream', 'story'])",
+                items: { 
+                  type: "string", 
+                  enum: ["stream", "story", "explore", "reels"] 
+                },
+                default: ["stream"]
+              },
+              devicePlatforms: {
+                type: "array",
+                description: "Target specific devices",
+                items: {
+                  type: "string",
+                  enum: ["mobile", "desktop"]
+                }
+              },
+              userOs: {
+                type: "array",
+                description: "Target specific operating systems",
+                items: {
+                  type: "string",
+                  enum: ["iOS", "Android", "Windows", "macOS"]
                 }
               }
             }

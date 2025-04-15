@@ -123,15 +123,15 @@ export const AdSetSchema = z.object({
   ]).optional(),
   startTime: z.string().optional(),
   endTime: z.string().optional(),
-  targeting: z.object({}).passthrough().optional(),
-  attributionSpec: z.array(z.object({}).passthrough()).optional(),
+  targeting: z.record(z.string(), z.unknown()).optional(),
+  attributionSpec: z.array(z.record(z.string(), z.unknown())).optional(),
   useNewAppClick: z.boolean().optional(),
   adsetSchedule: z.array(z.object({
     daysOfWeek: z.array(z.number().min(1).max(7)),
     startMinute: z.number().min(0).max(1439),
     endMinute: z.number().min(0).max(1439)
   })).optional(),
-  promotedObject: z.object({}).passthrough().optional()
+  promotedObject: z.record(z.string(), z.unknown()).optional()
 }).refine(data => {
   // Cannot have both dailyBudget and lifetimeBudget
   if (data.dailyBudget && data.lifetimeBudget) {
@@ -161,7 +161,7 @@ export const AdCreativeSchema = z.object({
       imageHash: z.string().optional(),
       callToAction: z.object({
         type: z.string(),
-        value: z.object({}).passthrough().optional()
+        value: z.record(z.string(), z.unknown()).optional()
       }).optional()
     }).optional(),
     videoData: z.object({
@@ -170,12 +170,12 @@ export const AdCreativeSchema = z.object({
       message: z.string().optional(),
       callToAction: z.object({
         type: z.string(),
-        value: z.object({}).passthrough().optional()
+        value: z.record(z.string(), z.unknown()).optional()
       }).optional()
     }).optional()
   }).optional(),
   objectStoryId: z.string().optional(),
-  assetFeedSpec: z.object({}).passthrough().optional(),
+  assetFeedSpec: z.record(z.string(), z.unknown()).optional(),
   imageUrl: z.string().url("Invalid image URL").optional(),
   imageHash: z.string().optional(),
   linkUrl: z.string().url("Invalid link URL").optional(),
@@ -199,7 +199,7 @@ export const AdSchema = z.object({
   status: z.enum(["ACTIVE", "PAUSED", "DELETED", "ARCHIVED"]).optional().default("PAUSED"),
   creativeId: z.string().optional(),
   creative: AdCreativeSchema.optional(),
-  trackingSpecs: z.array(z.object({}).passthrough()).optional(),
+  trackingSpecs: z.array(z.record(z.string(), z.unknown())).optional(),
   adLabels: z.array(z.object({
     name: z.string()
   })).optional(),

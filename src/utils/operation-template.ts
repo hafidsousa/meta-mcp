@@ -14,7 +14,7 @@ import { z } from 'zod';
  * @param schema Zod schema for validation
  * @returns A function that creates the entity
  */
-export function createOperation<T, U, V>(
+export function createOperation<T, U extends Record<string, unknown>, V>(
   entityType: string,
   schema: z.ZodType<T>
 ) {
@@ -109,7 +109,7 @@ export function getOperation<T>(entityType: string) {
  * @param entityType Entity type name (e.g., 'campaign', 'adset', 'ad')
  * @returns A function that updates the entity
  */
-export function updateOperation<T, U, V>(
+export function updateOperation<T, U extends Record<string, unknown>, V>(
   entityType: string,
 ) {
   return async function(

@@ -1,5 +1,5 @@
 // Re-export what clients will need
-export * from './tools';
+export * from './tools/index';
 
 export * from './client';
 export * from './config';

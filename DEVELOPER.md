@@ -13,7 +13,12 @@ meta-mcp/
 │   ├── handlers.ts      # MCP request handlers
 │   ├── index.ts         # Library exports
 │   ├── server.ts        # MCP server implementation
-│   ├── tools.ts         # Tool definitions
+│   ├── tools/           # Tool definitions organized by entity type
+│   │   ├── index.ts     # Tool exports and getAllTools function
+│   │   ├── campaign.ts  # Campaign tool definitions
+│   │   ├── adset.ts     # Ad set tool definitions
+│   │   ├── ad.ts        # Ad tool definitions
+│   │   └── account.ts   # Account tool definitions
 │   ├── types.ts         # Type definitions
 │   ├── operations/      # API operations organized by entity
 │   ├── scripts/         # CLI scripts and utilities

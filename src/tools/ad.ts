@@ -85,11 +85,11 @@ export const AD_TOOL: Tool = {
                 properties: {
                   pageId: { 
                     type: "string", 
-                    description: "Facebook Page ID that will publish the ad" 
+                    description: "Facebook Page ID that will publish the ad. Must be an official Facebook Page ID, not an arbitrary value." 
                   },
                   instagramActorId: { 
                     type: "string", 
-                    description: "Instagram account ID for Instagram placement ads" 
+                    description: "Instagram account ID for Instagram placement ads. Must be an official Instagram account ID obtained from Facebook's API, not an arbitrary value." 
                   },
                   linkData: { 
                     type: "object", 
@@ -102,6 +102,29 @@ export const AD_TOOL: Tool = {
                   videoData: { 
                     type: "object", 
                     description: "Video ad specifications" 
+                  }
+                }
+              },
+              promotedObject: {
+                type: "object",
+                description: "Object being promoted by this ad - must contain official IDs from Facebook's platform",
+                properties: {
+                  pageId: { 
+                    type: "string", 
+                    description: "Facebook Page ID - must be an official Facebook Page ID, not an arbitrary value." 
+                  },
+                  applicationId: { 
+                    type: "string", 
+                    description: "App ID for app promotion - must be an official Facebook app ID, not an arbitrary value." 
+                  },
+                  pixelId: { 
+                    type: "string", 
+                    description: "Pixel ID for conversion tracking - must be an official Facebook pixel ID, not an arbitrary value." 
+                  },
+                  customEventType: { 
+                    type: "string", 
+                    description: "Type of custom conversion event to optimize for",
+                    enum: ["COMPLETE_REGISTRATION", "ADD_TO_CART", "PURCHASE", "LEAD", "VIEW_CONTENT"]
                   }
                 }
               }
@@ -295,6 +318,55 @@ export const UPDATE_AD_TOOL: Tool = {
               urlTags: { 
                 type: "string", 
                 description: "Additional URL parameters for tracking (e.g., 'utm_source=facebook&utm_medium=cpc')" 
+              },
+              objectStorySpec: { 
+                type: "object", 
+                description: "Page post ad specifications - for creating ads from Page posts", 
+                properties: {
+                  pageId: { 
+                    type: "string", 
+                    description: "Facebook Page ID that will publish the ad. Must be an official Facebook Page ID, not an arbitrary value." 
+                  },
+                  instagramActorId: { 
+                    type: "string", 
+                    description: "Instagram account ID for Instagram placement ads. Must be an official Instagram account ID connected to your Facebook account, not an arbitrary value." 
+                  },
+                  linkData: { 
+                    type: "object", 
+                    description: "Link ad specifications" 
+                  },
+                  photoData: { 
+                    type: "object", 
+                    description: "Photo ad specifications" 
+                  },
+                  videoData: { 
+                    type: "object", 
+                    description: "Video ad specifications" 
+                  }
+                }
+              },
+              promotedObject: {
+                type: "object",
+                description: "Object being promoted by this ad - must contain official IDs from Facebook's platform",
+                properties: {
+                  pageId: { 
+                    type: "string", 
+                    description: "Facebook Page ID - must be an official Facebook Page ID, not an arbitrary value." 
+                  },
+                  applicationId: { 
+                    type: "string", 
+                    description: "App ID for app promotion - must be an official Facebook app ID, not an arbitrary value." 
+                  },
+                  pixelId: { 
+                    type: "string", 
+                    description: "Pixel ID for conversion tracking - must be an official Facebook pixel ID, not an arbitrary value." 
+                  },
+                  customEventType: { 
+                    type: "string", 
+                    description: "Type of custom conversion event to optimize for",
+                    enum: ["COMPLETE_REGISTRATION", "ADD_TO_CART", "PURCHASE", "LEAD", "VIEW_CONTENT"]
+                  }
+                }
               }
             }
           },

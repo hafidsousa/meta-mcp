@@ -2,7 +2,8 @@ export class FacebookMarketingError extends Error {
   constructor(
     message: string,
     public code: string,
-    public originalError?: unknown
+    public originalError?: unknown,
+    public errorDetails?: Record<string, any> | null
   ) {
     super(message);
     this.name = 'FacebookMarketingError';

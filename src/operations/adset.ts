@@ -9,6 +9,7 @@
 
 import { AdSet, AdSetConfig, AdSetResponse } from '../types';
 import { apiRequest, handleApiError } from '../utils/api';
+import { FacebookMarketingError } from '../errors';
 import * as humps from 'humps';
 
 // Define the AdSetConfigType interface to be compatible with Partial<AdSetConfig>
@@ -182,6 +183,19 @@ export async function createAdSet(
       } as AdSet
     };
   } catch (error) {
+    // Pass detailed error information when available
+    if (error instanceof FacebookMarketingError && error.errorDetails) {
+      return {
+        success: false,
+        error: {
+          message: error.message,
+          code: error.code,
+          details: error.errorDetails
+        }
+      };
+    }
+    
+    // Otherwise handle using the standard error handler
     handleApiError(error, 'create ad set');
     throw error;
   }

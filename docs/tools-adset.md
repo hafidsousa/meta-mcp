@@ -30,6 +30,25 @@ const result = await mcp.call('meta-mcp.createAdSet', { config: { ... } });
 console.log(`Created with ID: ${result.id}`);
 ```
 
+### ⚠️ Important Targeting Requirements
+
+When using the following targeting parameters, you **MUST** use verified and valid Facebook IDs. Using invalid IDs will result in API errors:
+
+- **interests**: All interest IDs must be valid Facebook interest taxonomy IDs
+- **behaviors**: All behavior IDs must be valid Facebook behavior taxonomy IDs
+- **regions**: Must use valid Facebook region keys
+- **cities**: Must use valid Facebook city keys
+- **zip/postal codes**: Must be in a recognized format for the country
+- **customAudiences**: Must be valid custom audience IDs from your Facebook account
+- **exclusions**: All IDs within exclusion rules must be valid Facebook taxonomy IDs
+
+To obtain valid IDs:
+1. Use the Facebook Ads Manager UI to find and verify IDs
+2. Use the [Facebook Marketing API targeting search endpoints](https://developers.facebook.com/docs/marketing-api/audiences/reference/targeting-search/)
+3. Test targeting parameters in smaller configurations before building complex targeting rules
+
+Invalid IDs will typically result in error code #100 from the Facebook API with a message like "Param targeting[interests][0][id] must be a valid interest id".
+
 ---
 
 ## getAdSets

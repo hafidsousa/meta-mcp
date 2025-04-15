@@ -63,10 +63,17 @@ The project integrates with Facebook's Marketing API v22.0, which provides progr
 1. **src/**: Source code
    - **operations/**: Domain-specific operations (campaign, adset, ad, account)
    - **utils/**: Utility functions and helpers
+     - **api.ts**: API request utilities
+     - **docgen.ts**: Documentation generation utility
+   - **scripts/**: CLI scripts and utilities
+     - **list-accounts.ts**: List available ad accounts
+     - **generate-token-url.ts**: Generate authentication URLs
+     - **generate-docs.ts**: Generate JSON documentation
+     - **generate-markdown-docs.ts**: Generate Markdown documentation
    - **types.ts**: Type definitions
    - **client.ts**: Main client facade
    - **config.ts**: Configuration management
-   - **tools.ts**: MCP tool definitions
+   - **tools/**: MCP tool definitions organized by entity type
    - **handlers.ts**: MCP request handlers
    - **server.ts**: MCP server setup
 
@@ -86,6 +93,40 @@ The project integrates with Facebook's Marketing API v22.0, which provides progr
    - **api/**: API specifications
    - **facebook/**: Facebook API reference
    - **examples/**: Usage examples
+   - **tools.json**: Generated tool definitions
+   - **tools-index.md**: Documentation index
+   - **tools-campaign.md**: Campaign tool documentation
+   - **tools-adset.md**: Ad set tool documentation
+   - **tools-ad.md**: Ad tool documentation
+   - **tools-account.md**: Account tool documentation
+
+## Documentation Generation System
+The project includes a comprehensive documentation generation system that creates standardized tool definitions from TypeScript types:
+
+1. **Core Components**:
+   - **src/utils/docgen.ts**: Core utility for generating tool definitions
+   - **src/scripts/generate-docs.ts**: Script to generate JSON documentation
+   - **src/scripts/generate-markdown-docs.ts**: Script to convert JSON to Markdown
+
+2. **Generation Process**:
+   - TypeScript types are analyzed and converted to tool definitions
+   - Tool definitions are serialized to JSON format
+   - JSON is then converted to human-readable Markdown
+   - Tools are categorized by entity type (campaigns, ad sets, ads, accounts)
+
+3. **Documentation Commands**:
+   - `npm run generate-docs`: Generate JSON documentation
+   - `npm run generate-docs -- --file`: Write JSON to file
+   - `npm run generate-markdown-docs`: Generate Markdown from JSON
+   - `npm run docs`: Run both steps in sequence
+
+4. **Generated Files**:
+   - **docs/tools.json**: Complete tool definitions in JSON format
+   - **docs/tools-index.md**: Index of all tool documentation
+   - **docs/tools-campaign.md**: Campaign-specific tools
+   - **docs/tools-adset.md**: Ad set-specific tools
+   - **docs/tools-ad.md**: Ad-specific tools
+   - **docs/tools-account.md**: Account-specific tools
 
 ## Data Models
 The system works with several key data models that map to Facebook Marketing API entities:
@@ -130,6 +171,7 @@ The system works with several key data models that map to Facebook Marketing API
    - Schema-based parameter validation
    - Standardized error responses
    - Consistent metadata handling
+   - Automatically generated from TypeScript types
 
 3. **Request Handling**
    - Endpoint: /tools/list for discovering available tools
@@ -183,8 +225,12 @@ The system works with several key data models that map to Facebook Marketing API
    - list-campaigns: Tool to view campaigns
    - generate-token-url: Generate authentication URLs
    - create-campaign: Create test campaigns
-   - test-mcp: Test MCP server functionality
+   - generate-docs: Generate tool documentation
+   - generate-markdown-docs: Generate Markdown documentation
+   - docs: Combined documentation generation
 
 6. **Utility Functions**
    - fetchAdAccounts: Get ad accounts for a user
-   - extractAdAccountId: Clean ad account ID format 
+   - extractAdAccountId: Clean ad account ID format
+   - generateToolFromType: Generate tool definitions from types
+   - generateAllToolDefinitions: Generate all tool documentation 
