@@ -1,6 +1,6 @@
 /**
  * Command-line tool to create a Facebook Ad Campaign
- * Usage: npx ts-node src/create-campaign.ts
+ * Usage: npx ts-node src/scripts/create-campaign.ts
  * 
  * This script creates a simple campaign with the OUTCOME_SALES objective
  */
@@ -10,7 +10,7 @@ import {
   FacebookMarketingClient, 
   CampaignConfig,
   FacebookConfig 
-} from './';
+} from '../';
 
 // Load environment variables
 loadEnv();

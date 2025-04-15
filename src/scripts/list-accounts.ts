@@ -4,8 +4,8 @@
  */
 
 import { config as loadEnv } from 'dotenv';
-import { fetchAdAccounts, extractAdAccountId } from './mcp-utils';
-import { FacebookAdAccount } from './types';
+import { fetchAdAccounts, extractAdAccountId } from '../mcp-utils';
+import { FacebookAdAccount } from '../types';
 
 // Load environment variables
 loadEnv();

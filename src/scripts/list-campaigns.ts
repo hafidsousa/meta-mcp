@@ -4,7 +4,7 @@
  */
 
 import { config as loadEnv } from 'dotenv';
-import { FacebookMarketingClient } from './client';
+import { FacebookMarketingClient } from '../client';
 
 // Load environment variables
 loadEnv();
