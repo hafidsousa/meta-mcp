@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/hafidsousa/meta-mcp/compare/v1.5.0...v1.6.0) (2025-04-15)
+
+
+### Features
+
+* Implement case conversion for API compatibility using humps library ([bd390ea](https://github.com/hafidsousa/meta-mcp/commit/bd390ea7c56073a757db1485dc460905af91bda9))
+
 # [1.5.0](https://github.com/hafidsousa/meta-mcp/compare/v1.4.0...v1.5.0) (2025-04-15)
 
 
