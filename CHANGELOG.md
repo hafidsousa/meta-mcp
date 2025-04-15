@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/hafidsousa/meta-mcp/compare/v1.3.0...v1.4.0) (2025-04-15)
+
+
+### Features
+
+* Enhance Ad Set functionality and improve API integration ([730229e](https://github.com/hafidsousa/meta-mcp/commit/730229e166bad95f9c06845fcfdf88f92459f895))
+
 # [1.3.0](https://github.com/hafidsousa/meta-mcp/compare/v1.2.0...v1.3.0) (2025-04-15)
 
 
