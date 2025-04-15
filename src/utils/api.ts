@@ -27,6 +27,8 @@ export async function apiRequest<T>(
     const url = `${baseUrl}/${path}`;
     let response;
     
+    console.log(`Making ${method} request to: ${url}`);
+    
     if (method === 'GET') {
       // For GET requests, append params to URL
       const queryParams: Record<string, string> = {};
@@ -41,6 +43,7 @@ export async function apiRequest<T>(
       });
       
       const queryString = new URLSearchParams(queryParams).toString();
+      console.log(`GET params: ${queryString}`);
       response = await fetch(`${url}?${queryString}`);
     } else {
       // For POST/DELETE, use request body
@@ -54,6 +57,8 @@ export async function apiRequest<T>(
         }
       }
       
+      console.log(`${method} params: `, Object.fromEntries(body.entries()));
+      
       response = await fetch(url, {
         method,
         body,
@@ -66,8 +71,11 @@ export async function apiRequest<T>(
     const data = await response.json() as any;
     
     if (!response.ok || data.error) {
+      console.error(`API Error response:`, data);
       throw new Error(
         data.error?.message || 
+        data.error_description ||
+        data.error_msg ||
         data.error_message || 
         `API request failed with status ${response.status}`
       );
@@ -87,6 +95,8 @@ export async function apiRequest<T>(
  */
 export function handleApiError(error: unknown, operation: string): never {
   if (error instanceof Error) {
+    console.error(`Error in operation "${operation}": ${error.message}`);
+    
     // Handle rate limiting
     if (error.message.includes('rate limit')) {
       throw new FacebookMarketingError(

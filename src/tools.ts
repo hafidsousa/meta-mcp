@@ -55,12 +55,163 @@ export const ADSET_TOOL: Tool = {
         type: "object",
         description: "Ad set configuration defining audience targeting and budget settings",
         properties: {
-          name: { type: "string", description: "Ad set name - ideally describes the audience or targeting approach" },
-          campaignId: { type: "string", description: "Parent campaign ID (format: '23843xxxxxxxx') - obtain this from createCampaign response or getCampaigns" },
-          dailyBudget: { type: "number", description: "Daily budget in cents (e.g., 5000 = $50.00). Must be at least 100 (= $1.00)" },
-          targeting: { type: "object", description: "Targeting specifications object defining the audience (age, location, interests, behaviors, etc.)" }
+          name: { 
+            type: "string", 
+            description: "Ad set name - ideally describes the audience or targeting approach" 
+          },
+          campaignId: { 
+            type: "string", 
+            description: "Parent campaign ID (format: '23843xxxxxxxx') - obtain this from createCampaign response or getCampaigns" 
+          },
+          status: { 
+            type: "string", 
+            description: "Ad set status ('ACTIVE' to launch immediately, 'PAUSED' to set up but not activate)", 
+            enum: ["ACTIVE", "PAUSED"],
+            default: "PAUSED"
+          },
+          dailyBudget: { 
+            type: "number", 
+            description: "Daily budget in cents (e.g., 5000 = $50.00). Must be at least 100 (= $1.00)" 
+          },
+          lifetimeBudget: { 
+            type: "number", 
+            description: "Lifetime budget in cents (e.g., 100000 = $1,000.00). Alternative to dailyBudget - don't use both." 
+          },
+          startTime: { 
+            type: "string", 
+            description: "When to start running ads in ISO 8601 format (e.g., '2025-04-20T12:00:00+0000'). If not specified, ads start immediately." 
+          },
+          endTime: { 
+            type: "string", 
+            description: "When to stop running ads in ISO 8601 format (e.g., '2025-05-20T12:00:00+0000'). Required if using lifetimeBudget." 
+          },
+          optimizationGoal: { 
+            type: "string", 
+            description: "What results to optimize for (e.g., 'LINK_CLICKS', 'IMPRESSIONS', 'REACH', 'CONVERSIONS')",
+            enum: ["NONE", "APP_INSTALLS", "AD_RECALL_LIFT", "ENGAGED_USERS", "EVENT_RESPONSES", "IMPRESSIONS", 
+                  "LEAD_GENERATION", "QUALITY_LEAD", "LINK_CLICKS", "OFFSITE_CONVERSIONS", "PAGE_LIKES", 
+                  "POST_ENGAGEMENT", "QUALITY_CALL", "REACH", "LANDING_PAGE_VIEWS", "VISIT_INSTAGRAM_PROFILE", 
+                  "VALUE", "THRUPLAY", "DERIVED_EVENTS", "CONVERSIONS"],
+            default: "LINK_CLICKS"
+          },
+          billingEvent: { 
+            type: "string", 
+            description: "When you get charged (e.g., 'IMPRESSIONS', 'LINK_CLICKS', 'APP_INSTALLS')",
+            enum: ["APP_INSTALLS", "IMPRESSIONS", "LINK_CLICKS", "NONE", "PAGE_LIKES", "POST_ENGAGEMENT", "THRUPLAY"],
+            default: "IMPRESSIONS" 
+          },
+          bidAmount: { 
+            type: "number", 
+            description: "Bid amount in cents. Only use when needed for specific bid strategies." 
+          },
+          bidStrategy: { 
+            type: "string", 
+            description: "How to optimize bidding. Usually leave as default for best results.",
+            enum: ["LOWEST_COST_WITHOUT_CAP", "LOWEST_COST_WITH_BID_CAP", "COST_CAP"],
+            default: "LOWEST_COST_WITHOUT_CAP"
+          },
+          targeting: { 
+            type: "object", 
+            description: "Targeting specifications object defining the audience", 
+            properties: {
+              geoLocations: {
+                type: "object",
+                description: "Geographic targeting settings",
+                properties: {
+                  countries: { 
+                    type: "array", 
+                    description: "Country codes (e.g., ['US', 'CA'] for United States and Canada)",
+                    items: { type: "string" }
+                  }
+                }
+              },
+              ageMin: { 
+                type: "number", 
+                description: "Minimum age (13-65)", 
+                minimum: 13, 
+                maximum: 65,
+                default: 18 
+              },
+              ageMax: { 
+                type: "number", 
+                description: "Maximum age (13-65)", 
+                minimum: 13, 
+                maximum: 65,
+                default: 65 
+              },
+              genders: { 
+                type: "array", 
+                description: "Gender targeting: [1] = male only, [2] = female only, [1,2] = all genders",
+                items: { type: "number", enum: [1, 2] },
+                default: [1, 2]
+              },
+              interests: { 
+                type: "array", 
+                description: "Interest-based targeting. Each interest needs Facebook's interest ID.",
+                items: { 
+                  type: "object", 
+                  properties: {
+                    id: { type: "string", description: "Facebook interest ID" },
+                    name: { type: "string", description: "Optional name for reference" }
+                  },
+                  required: ["id"]
+                }
+              },
+              publisherPlatforms: { 
+                type: "array", 
+                description: "Platforms to show ads on (e.g., ['facebook', 'instagram'])",
+                items: { 
+                  type: "string", 
+                  enum: ["facebook", "instagram", "audience_network", "messenger"] 
+                }
+              },
+              facebookPositions: { 
+                type: "array", 
+                description: "Positions on Facebook (e.g., ['feed', 'right_hand_column'])",
+                items: { 
+                  type: "string", 
+                  enum: ["feed", "right_hand_column", "instant_article", "marketplace", "video_feeds", "story", "search", "instream_video"] 
+                }
+              },
+              instagramPositions: { 
+                type: "array", 
+                description: "Positions on Instagram (e.g., ['stream', 'story'])",
+                items: { 
+                  type: "string", 
+                  enum: ["stream", "story", "explore", "reels"] 
+                }
+              }
+            }
+          },
+          pacingType: { 
+            type: "array", 
+            description: "Pacing type determines how budget is spent throughout the day",
+            items: { type: "string", enum: ["standard", "day_parting"] },
+            default: ["standard"]
+          },
+          attributionSpec: { 
+            type: "array", 
+            description: "Attribution settings for conversion tracking",
+            items: { type: "object" }
+          },
+          destinationType: { 
+            type: "string", 
+            description: "Destination type for the ad" 
+          },
+          adSchedules: { 
+            type: "array", 
+            description: "Schedule specific hours/days when ads should run",
+            items: { 
+              type: "object", 
+              properties: {
+                days: { type: "array", items: { type: "number" }, description: "Days of week (0-6, where 0 is Sunday)" },
+                hours: { type: "array", items: { type: "number" }, description: "Hours (0-23)" },
+                minutes: { type: "array", items: { type: "number" }, description: "Minutes (0, 15, 30, 45)" }
+              }
+            }
+          }
         },
-        required: ["name", "campaignId"]
+        required: ["name", "campaignId", "targeting"]
       }
     },
     required: ["config"]

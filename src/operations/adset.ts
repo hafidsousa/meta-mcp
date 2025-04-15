@@ -7,116 +7,242 @@ import { apiRequest, handleApiError } from '../utils/api';
 import { mergeConfig } from '../config';
 import { DEFAULT_ADSET_CONFIG } from '../config';
 
+// Define the AdSetConfigType interface to be compatible with Partial<AdSetConfig>
+interface AdSetConfigType {
+  name?: string;
+  campaignId?: string;
+  status?: string;
+  optimizationGoal?: string;
+  billingEvent?: string;
+  bidAmount?: number;
+  dailyBudget?: number;
+  lifetimeBudget?: number;
+  startTime?: string;
+  endTime?: string;
+  targeting?: any;
+  pacingType?: string[];
+  bidStrategy?: string;
+  attributionSpec?: Record<string, any>[];
+  useAverageCost?: boolean;
+  promotedObject?: Record<string, any>;
+  destinationType?: string;
+  adSchedules?: Record<string, any>[];
+}
+
+/**
+ * Converts object keys from camelCase to snake_case
+ * @param obj Object to convert
+ * @returns New object with converted keys
+ */
+function convertKeysToSnakeCase(obj: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+  
+  Object.entries(obj).forEach(([key, value]) => {
+    // Convert camelCase to snake_case
+    const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+    
+    // Handle nested objects
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      result[snakeKey] = convertKeysToSnakeCase(value);
+    } else {
+      result[snakeKey] = value;
+    }
+  });
+  
+  return result;
+}
+
 /**
  * Creates a new ad set within a campaign
  * @param baseUrl Base URL for the API
  * @param adAccountId Ad account ID
  * @param accessToken Facebook access token
- * @param config Ad set configuration object
+ * @param adSetConfig Ad set configuration
  * @returns Promise with ad set creation response
  */
 export async function createAdSet(
   baseUrl: string,
   adAccountId: string,
   accessToken: string,
-  config: Partial<AdSetConfig>
+  adSetConfig: AdSetConfigType
 ): Promise<AdSetResponse> {
   try {
-    const finalConfig = mergeConfig(DEFAULT_ADSET_CONFIG, config);
-    
-    // Convert to snake_case for API
-    const params: Record<string, any> = {
-      name: finalConfig.name,
-      campaign_id: finalConfig.campaignId,
-      status: finalConfig.status || 'PAUSED',
-      targeting: finalConfig.targeting,
-      optimization_goal: finalConfig.optimizationGoal,
-      billing_event: finalConfig.billingEvent
+    const {
+      name,
+      campaignId,
+      status = 'PAUSED',
+      optimizationGoal,
+      billingEvent,
+      bidAmount,
+      dailyBudget,
+      lifetimeBudget,
+      startTime,
+      endTime,
+      targeting,
+      pacingType,
+      bidStrategy,
+      attributionSpec,
+      useAverageCost,
+      promotedObject,
+      destinationType,
+      adSchedules
+    } = adSetConfig;
+
+    // Validate required fields
+    if (!name) throw new Error('Ad set name is required');
+    if (!campaignId) throw new Error('Campaign ID is required');
+    if (!targeting) throw new Error('Targeting is required');
+
+    // Path for creating an ad set
+    const path = `act_${adAccountId}/adsets`;
+
+    // Prepare the parameters for the API request
+    const params: any = {
+      campaign_id: campaignId,
+      name,
+      status,
+      special_ad_categories: [],
     };
 
-    // Add budget parameters
-    if (finalConfig.dailyBudget) {
-      params.daily_budget = finalConfig.dailyBudget;
+    // Add optimization goal
+    if (optimizationGoal) {
+      params.optimization_goal = optimizationGoal;
+    }
+
+    // Add billing event
+    if (billingEvent) {
+      params.billing_event = billingEvent;
+    }
+
+    // Add bid amount
+    if (bidAmount) {
+      params.bid_amount = bidAmount;
+    }
+
+    // Add budget (either daily or lifetime, not both)
+    if (dailyBudget) {
+      params.daily_budget = dailyBudget;
     }
     
-    if (finalConfig.lifetimeBudget) {
-      params.lifetime_budget = finalConfig.lifetimeBudget;
+    if (lifetimeBudget) {
+      params.lifetime_budget = lifetimeBudget;
+    }
+
+    // Add start and end times
+    if (startTime) {
+      params.start_time = startTime;
+    }
+
+    if (endTime) {
+      params.end_time = endTime;
     }
     
-    // Add schedule parameters
-    if (finalConfig.startTime) {
-      params.start_time = finalConfig.startTime;
+    // Add bid strategy
+    if (bidStrategy) {
+      params.bid_strategy = bidStrategy;
     }
     
-    if (finalConfig.endTime) {
-      params.end_time = finalConfig.endTime;
-    }
-    
-    // Add bidding parameters
-    if (finalConfig.bidAmount) {
-      params.bid_amount = finalConfig.bidAmount;
-    }
-    
-    if (finalConfig.bidStrategy) {
-      params.bid_strategy = finalConfig.bidStrategy;
-    }
-    
-    // Add promoted object if specified
-    if (finalConfig.promotedObject) {
-      // Convert camelCase keys to snake_case
-      const promotedObject: Record<string, any> = {};
-      Object.entries(finalConfig.promotedObject).forEach(([key, value]) => {
-        // Convert pageId to page_id, etc.
-        const snakeCaseKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-        promotedObject[snakeCaseKey] = value;
-      });
-      params.promoted_object = promotedObject;
-    }
-    
-    // Add time-based scheduling
-    if (finalConfig.adSchedules && finalConfig.adSchedules.length > 0) {
-      params.ad_schedules = finalConfig.adSchedules;
-    }
-    
-    // Add attribution specs
-    if (finalConfig.attributionSpec) {
-      params.attribution_spec = finalConfig.attributionSpec;
-    }
-    
-    // Add pacing type
-    if (finalConfig.pacingType) {
-      params.pacing_type = finalConfig.pacingType;
+    // Add attribution spec
+    if (attributionSpec) {
+      params.attribution_spec = attributionSpec;
     }
     
     // Add use average cost
-    if (finalConfig.useAverageCost !== undefined) {
-      params.use_average_cost = finalConfig.useAverageCost;
+    if (useAverageCost !== undefined) {
+      params.use_average_cost = useAverageCost;
+    }
+    
+    // Add promoted object
+    if (promotedObject) {
+      params.promoted_object = convertKeysToSnakeCase(promotedObject);
+    }
+    
+    // Add destination type
+    if (destinationType) {
+      params.destination_type = destinationType;
+    }
+    
+    // Add ad schedules
+    if (adSchedules) {
+      params.ad_schedules = adSchedules;
     }
 
-    const response = await apiRequest<{id: string}>(
+    // Handle targeting separately to fix serialization issues
+    if (targeting) {
+      // Convert from camelCase to snake_case naming convention
+      const targetingObj: Record<string, any> = {};
+      
+      // Handle geoLocations special case
+      if (targeting.geoLocations) {
+        targetingObj.geo_locations = {};
+        
+        if (targeting.geoLocations.countries) {
+          targetingObj.geo_locations.countries = targeting.geoLocations.countries;
+        }
+        
+        if (targeting.geoLocations.regions) {
+          targetingObj.geo_locations.regions = targeting.geoLocations.regions;
+        }
+        
+        if (targeting.geoLocations.cities) {
+          targetingObj.geo_locations.cities = targeting.geoLocations.cities;
+        }
+        
+        if (targeting.geoLocations.zips) {
+          targetingObj.geo_locations.zips = targeting.geoLocations.zips;
+        }
+      }
+      
+      // Handle other targeting parameters
+      if (targeting.ageMin !== undefined) targetingObj.age_min = targeting.ageMin;
+      if (targeting.ageMax !== undefined) targetingObj.age_max = targeting.ageMax;
+      if (targeting.genders) targetingObj.genders = targeting.genders;
+      if (targeting.interests) targetingObj.interests = targeting.interests;
+      if (targeting.behaviors) targetingObj.behaviors = targeting.behaviors;
+      if (targeting.locales) targetingObj.locales = targeting.locales;
+      if (targeting.publisherPlatforms) targetingObj.publisher_platforms = targeting.publisherPlatforms;
+      if (targeting.facebookPositions) targetingObj.facebook_positions = targeting.facebookPositions;
+      if (targeting.instagramPositions) targetingObj.instagram_positions = targeting.instagramPositions;
+      if (targeting.devicePlatforms) targetingObj.device_platforms = targeting.devicePlatforms;
+      if (targeting.userOs) targetingObj.user_os = targeting.userOs;
+      if (targeting.userDevice) targetingObj.user_device = targeting.userDevice;
+      if (targeting.flexibleSpec) targetingObj.flexible_spec = targeting.flexibleSpec;
+      if (targeting.exclusions) targetingObj.exclusions = targeting.exclusions;
+      if (targeting.customAudiences) targetingObj.custom_audiences = targeting.customAudiences;
+      if (targeting.excludedInterests) targetingObj.excluded_interests = targeting.excludedInterests;
+      if (targeting.excludedDemographics) targetingObj.excluded_demographics = targeting.excludedDemographics;
+      
+      // Properly stringify the targeting object
+      params.targeting = JSON.stringify(targetingObj);
+    }
+
+    // Add pacing type
+    if (pacingType) {
+      params.pacing_type = pacingType;
+    }
+
+    // Make the API request
+    const response = await apiRequest<{ id: string }>(
       baseUrl,
-      `act_${adAccountId}/adsets`,
+      path,
       accessToken,
       'POST',
       params
     );
 
-    // Fetch the complete ad set data
-    const adSet = await apiRequest<AdSet>(
-      baseUrl,
-      `${response.id}`,
-      accessToken,
-      'GET',
-      { fields: 'id,name,campaign_id,daily_budget,lifetime_budget,bid_amount,bid_strategy,start_time,end_time,targeting,optimization_goal,billing_event,status,promoted_object' }
-    );
-
     return {
-      id: response.id,
       success: true,
-      data: adSet
+      id: response.id,
+      data: {
+        id: response.id,
+        name,
+        campaign_id: campaignId,
+        status
+      } as AdSet
     };
   } catch (error) {
     handleApiError(error, 'create ad set');
+    throw error;
   }
 }
 
@@ -190,13 +316,14 @@ export async function getAdSet(
   adSetId: string
 ): Promise<AdSet> {
   try {
+    // Define fields to request, removing fields that cause errors
     const fields = [
       'id', 'name', 'campaign_id', 'daily_budget', 'lifetime_budget',
       'bid_amount', 'bid_strategy', 'billing_event', 'optimization_goal',
       'targeting', 'status', 'start_time', 'end_time', 'created_time',
-      'updated_time', 'promoted_object', 'attribution_spec', 'use_average_cost',
+      'updated_time', 'promoted_object', 'attribution_spec',
       'pacing_type', 'budget_remaining', 'effective_status', 'adlabels',
-      'destination_type', 'execution_options', 'configured_status'
+      'destination_type', 'configured_status'
     ].join(',');
 
     return await apiRequest<AdSet>(
@@ -208,6 +335,7 @@ export async function getAdSet(
     );
   } catch (error) {
     handleApiError(error, `get ad set ${adSetId}`);
+    throw error;
   }
 }
 
@@ -233,7 +361,7 @@ export async function getAccountAdSets(
         'id', 'name', 'campaign_id', 'daily_budget', 'lifetime_budget',
         'bid_amount', 'bid_strategy', 'billing_event', 'optimization_goal',
         'targeting', 'status', 'start_time', 'end_time', 'created_time',
-        'updated_time', 'promoted_object', 'attribution_spec', 'use_average_cost',
+        'updated_time', 'promoted_object', 'attribution_spec',
         'pacing_type', 'budget_remaining', 'effective_status'
       ].join(',')
     };
@@ -258,6 +386,7 @@ export async function getAccountAdSets(
     return response.data || [];
   } catch (error) {
     handleApiError(error, 'get account ad sets');
+    throw error;
   }
 }
 
@@ -361,12 +490,7 @@ export async function updateAdSet(
     if (config.pacingType) {
       params.pacing_type = config.pacingType;
     }
-    
-    // Add use average cost
-    if (config.useAverageCost !== undefined) {
-      params.use_average_cost = config.useAverageCost;
-    }
-    
+
     // Make the API request to update the ad set
     const response = await apiRequest<{success: boolean}>(
       baseUrl,
@@ -386,5 +510,6 @@ export async function updateAdSet(
     };
   } catch (error) {
     handleApiError(error, `update ad set ${adSetId}`);
+    throw error;
   }
 } 
