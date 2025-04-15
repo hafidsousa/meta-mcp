@@ -9,7 +9,9 @@ import { config as loadEnv } from 'dotenv';
 import { 
   FacebookMarketingClient, 
   CampaignConfig,
-  FacebookConfig 
+  FacebookConfig,
+  CampaignObjective,
+  CampaignStatus
 } from '../';
 
 // Load environment variables
@@ -48,8 +50,8 @@ const createAdCampaign = async () => {
     // Create Campaign
     const campaignConfig: CampaignConfig = {
       name: `Dummy-Campaign-${dateStr}`,
-      objective: 'OUTCOME_SALES',
-      status: 'PAUSED',  // Start as paused for safety
+      objective: CampaignObjective.OUTCOME_SALES,
+      status: CampaignStatus.PAUSED,  // Start as paused for safety
       specialAdCategories: []
     };
     

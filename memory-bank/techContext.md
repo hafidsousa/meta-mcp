@@ -29,24 +29,51 @@
 
 ## Project Structure
 1. **Core Files**
-   - `src/server.ts`: Main MCP server implementation
-   - `src/client.ts`: Facebook Marketing API client
+   - `src/server.ts`: Main MCP server implementation (slim central file that sets up and runs the server)
+   - `src/client.ts`: Facebook Marketing API client (facade)
    - `src/types.ts`: Type definitions
-   - `src/mcp-utils.ts`: Utility functions for MCP
    - `src/errors.ts`: Error handling utilities
-   - `src/config.ts`: Configuration management
+   - `src/config.ts`: Configuration management, environment variables loading, and logging utilities
+   - `src/tools.ts`: All tool schema definitions
+   - `src/handlers.ts`: Implementation of MCP request handlers
    - `src/index.ts`: Main export file
 
-2. **Script Files**
+2. **Modular Operations**
+   - `src/utils/api.ts`: API request utilities and error handling
+   - `src/operations/campaign.ts`: Campaign-specific operations
+   - `src/operations/adset.ts`: Ad Set specific operations
+   - `src/operations/ad.ts`: Ad specific operations
+   - `src/operations/account.ts`: Account management operations
+
+3. **Script Files**
    - `src/scripts/list-accounts.ts`: Utility to list available ad accounts
    - `src/scripts/list-campaigns.ts`: Utility to list campaigns
    - `src/scripts/create-campaign.ts`: Campaign creation script
    - `src/scripts/generate-token-url.ts`: Auth token URL generator
    - `src/scripts/test-mcp.ts`: Test script for MCP server
 
-3. **Build Output**
+4. **Build Output**
    - `dist/`: Compiled JavaScript files
    - `dist/types/`: TypeScript declaration files
+
+## Architecture Principles
+1. **Modular Design**
+   - Each operation type (campaign, ad set, ad) in separate modules
+   - Common utilities in shared modules
+   - Client as facade to simplify API access
+   - All modules under 300 lines for maintainability
+
+2. **Consistent Patterns**
+   - Consistent parameter ordering (baseUrl, adAccountId, accessToken, config)
+   - Standard error handling across all modules
+   - Uniform function signatures and return types
+   - Clear separation between API requests and business logic
+
+3. **Code Organization**
+   - Related functionality grouped in specific modules
+   - API utilities shared across operation modules
+   - Each file with clear, single responsibility
+   - Facade pattern in client.ts for simplified API
 
 ## Documentation
 
@@ -64,6 +91,14 @@
    - Publishing instructions
    - Library architecture details
    - Contribution guidelines
+
+3. **/docs/ Directory**
+   - Canonical reference for API specifications
+   - Entity-specific documentation (ad-account.md, ad-campaign.md, ad-set.md, ad.md)
+   - AI assistants MUST consult these files for API specifications
+   - Links to official Facebook Marketing API references
+   - Implementation guidance for AI assistants
+   - Current as of Facebook Marketing API v22.0
 
 ## Technical Constraints
 1. **API Limitations**
@@ -135,6 +170,40 @@
    - Ad account management tools
    - MCP SDK integration
 
+## Facebook Marketing API Types
+1. **Campaign**
+   - Core campaign configuration
+   - Objective targeting (CONVERSIONS, LINK_CLICKS, etc.)
+   - Budget management (spend_cap)
+   - Status control (ACTIVE, PAUSED)
+   - Special ad categories handling
+
+2. **Ad Set**
+   - Targeting configuration (demographics, interests, behaviors)
+   - Budget management (daily_budget, lifetime_budget)
+   - Scheduling (start_time, end_time, ad_schedules)
+   - Bidding strategy (bid_amount, bid_strategy)
+   - Optimization goals (CONVERSIONS, IMPRESSIONS, LINK_CLICKS)
+   - Billing events (IMPRESSIONS, LINK_CLICKS)
+   - Platforms and placements (facebook, instagram, audience_network)
+   - Position targeting (feed, story, reels, etc.)
+   - Advanced optimization settings (attribution_spec, pacing_type)
+
+3. **Ad Creative**
+   - Ad content (title, body)
+   - Media assets (image_url, video_url)
+   - Call to action configuration
+   - Format settings (single_image, carousel, video)
+   - URL parameters and tracking
+   - Object story specs for Page post ads
+
+4. **Ad**
+   - Creative association
+   - Status management
+   - Tracking configuration
+   - Bidding controls
+   - Performance monitoring
+
 ## MCP Implementation
 1. **Server Implementation**
    - Uses official @modelcontextprotocol/sdk
@@ -161,13 +230,34 @@
    - Get owned ad accounts
    - Get client ad accounts
 
-2. **Command-line Utilities**
+2. **Campaign Management**
+   - Create campaign
+   - Pause campaign
+   - Get campaigns
+   - Get campaign details
+
+3. **Ad Set Management**
+   - Create ad set
+   - Pause ad set
+   - Get ad sets for campaign
+   - Get ad sets for account
+   - Get ad set details
+
+4. **Ad Management**
+   - Create ad
+   - Pause ad
+   - Get ads for ad set
+   - Get ads for account
+   - Get ad details
+   - Update ad
+
+5. **Command-line Utilities**
    - list-accounts: Tool to view available ad accounts
    - list-campaigns: Tool to view campaigns
    - generate-token-url: Generate authentication URLs
    - create-campaign: Create test campaigns
    - test-mcp: Test MCP server functionality
 
-3. **Utility Functions**
+6. **Utility Functions**
    - fetchAdAccounts: Get ad accounts for a user
    - extractAdAccountId: Clean ad account ID format 

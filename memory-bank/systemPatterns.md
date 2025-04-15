@@ -15,6 +15,7 @@ The system follows a modular architecture with clear separation of concerns:
 4. **Error Handling Strategy**: Comprehensive error management
 5. **API Versioning**: Support for Facebook Graph API v22.0
 6. **Direct API Integration**: Using native fetch for Facebook Graph API calls without SDK dependencies
+7. **File Size Constraints**: Module files kept under 300 lines for maintainability
 
 ## Design Patterns
 1. **Command Pattern**: For handling different advertising operations
@@ -22,26 +23,43 @@ The system follows a modular architecture with clear separation of concerns:
 3. **Singleton Pattern**: For configuration management
 4. **Adapter Pattern**: For API response formatting
 5. **Strategy Pattern**: For different operation implementations
+6. **Facade Pattern**: Client class provides a simplified interface to the subsystems
+
+## Code Organization
+1. **src/utils/api.ts**: API request utilities and error handling
+2. **src/operations/campaign.ts**: Campaign-specific operations
+3. **src/operations/adset.ts**: Ad Set specific operations
+4. **src/operations/ad.ts**: Ad specific operations
+5. **src/operations/account.ts**: Account management operations
+6. **src/client.ts**: Main client facade that delegates to operation modules
+7. **src/config.ts**: Configuration and environment management
+8. **src/tools.ts**: Tool schema definitions for MCP integration
+9. **src/handlers.ts**: MCP request handlers implementation
+10. **src/server.ts**: Slim main file that sets up and runs the MCP server
 
 ## Component Relationships
 ```mermaid
 graph TD
-    A[Cursor IDE] --> B[MCP Interface]
-    B --> C[Operation Handlers]
-    C --> D[API Integration Layer]
-    D --> E[Facebook Marketing API]
-    F[Configuration] --> C
-    F --> D
-    G[Response Formatters] --> B
-    C --> G
+    A[Cursor IDE] --> B[MCP Server]
+    B --> C[Tool Handlers]
+    C --> D[FacebookMarketingClient]
+    D --> E[Campaign Operations]
+    D --> F[AdSet Operations]
+    D --> G[Ad Operations]
+    D --> H[Account Operations]
+    E & F & G & H --> I[API Utilities]
+    I --> J[Facebook Marketing API]
+    K[Configuration] --> D
+    K --> E & F & G & H
+    L[Tool Definitions] --> B
 ```
 
 ## Data Flow
 1. Cursor IDE sends MCP command
 2. MCP Interface receives and validates command
-3. Operation Handler processes command
-4. API Integration Layer makes API call
-5. Response Formatter processes API response
+3. Client delegates to appropriate Operation Handler
+4. API Utilities make API call to Facebook
+5. Response processed and returned to Client
 6. Formatted response returned to Cursor IDE
 
 ## Security Patterns
@@ -57,6 +75,7 @@ graph TD
 3. Detailed error messages
 4. Error logging
 5. Graceful degradation
+6. Centralized error handling in API utilities
 
 ## Testing Patterns
 1. Unit testing for individual components

@@ -19,26 +19,41 @@ import {
   AdResponse,
   Campaign,
   AdSet,
-  Ad
+  Ad,
+  CampaignStatus
 } from './types';
-import {
-  DEFAULT_ADSET_CONFIG,
-  DEFAULT_CREATIVE_CONFIG,
-  FB_API_VERSION,
-  mergeConfig
-} from './config';
+import { FB_API_VERSION } from './config';
 import { FacebookMarketingError, ErrorCodes } from './errors';
 
+// Import operations from modular files
+import * as CampaignOperations from './operations/campaign';
+import * as AdSetOperations from './operations/adset';
+import * as AdOperations from './operations/ad';
+import * as AccountOperations from './operations/account';
+
+/**
+ * Facebook Marketing API Client
+ * Facade pattern implementation for Facebook Marketing API
+ */
 export class FacebookMarketingClient {
   private baseUrl: string;
   private config: FacebookConfig;
 
+  /**
+   * Creates a new Facebook Marketing API client
+   * @param config Configuration containing credentials and settings
+   */
   constructor(config: FacebookConfig) {
     this.validateConfig(config);
     this.config = config;
     this.baseUrl = `https://graph.facebook.com/${FB_API_VERSION}`;
   }
 
+  /**
+   * Validates the client configuration
+   * @param config Client configuration
+   * @throws Error if configuration is invalid
+   */
   private validateConfig(config: FacebookConfig) {
     if (!config.accessToken?.trim()) {
       throw new FacebookMarketingError(
@@ -55,299 +70,19 @@ export class FacebookMarketingClient {
     }
   }
 
-  /**
-   * Makes a Graph API request
-   * @param path API endpoint path
-   * @param method HTTP method
-   * @param params Request parameters
-   * @returns Promise with API response
-   */
-  private async apiRequest<T>(
-    path: string, 
-    method: 'GET' | 'POST' | 'DELETE' = 'GET', 
-    params: Record<string, any> = {}
-  ): Promise<T> {
-    try {
-      // Always include access token
-      params.access_token = this.config.accessToken;
-      
-      const url = `${this.baseUrl}/${path}`;
-      let response;
-      
-      if (method === 'GET') {
-        // For GET requests, append params to URL
-        const queryParams: Record<string, string> = {};
-        
-        // Convert all values to strings
-        Object.entries(params).forEach(([key, value]) => {
-          if (typeof value === 'object') {
-            queryParams[key] = JSON.stringify(value);
-          } else {
-            queryParams[key] = String(value);
-          }
-        });
-        
-        const queryString = new URLSearchParams(queryParams).toString();
-        response = await fetch(`${url}?${queryString}`);
-      } else {
-        // For POST/DELETE, use request body
-        const body = new URLSearchParams();
-        
-        for (const [key, value] of Object.entries(params)) {
-          if (typeof value === 'object') {
-            body.append(key, JSON.stringify(value));
-          } else {
-            body.append(key, String(value));
-          }
-        }
-        
-        response = await fetch(url, {
-          method,
-          body,
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        });
-      }
-      
-      const data = await response.json() as any;
-      
-      if (!response.ok || data.error) {
-        throw new Error(
-          data.error?.message || 
-          data.error_message || 
-          `API request failed with status ${response.status}`
-        );
-      }
-      
-      return data as T;
-    } catch (error) {
-      this.handleApiError(error, `${method} ${path}`);
-      throw error; // This will never execute due to handleApiError, but needed for TypeScript
-    }
-  }
-
-  private handleApiError(error: unknown, operation: string): never {
-    if (error instanceof Error) {
-      // Handle rate limiting
-      if (error.message.includes('rate limit')) {
-        throw new FacebookMarketingError(
-          `Rate limit exceeded during ${operation}`,
-          ErrorCodes.RATE_LIMIT,
-          error
-        );
-      }
-      
-      // Handle network errors
-      if (error.message.includes('network') || error.message.includes('ECONNREFUSED')) {
-        throw new FacebookMarketingError(
-          `Network error during ${operation}`,
-          ErrorCodes.NETWORK_ERROR,
-          error
-        );
-      }
-    }
-
-    // Generic API error
-    throw new FacebookMarketingError(
-      `Error during ${operation}`,
-      ErrorCodes.API_ERROR,
-      error
-    );
-  }
-
+  // Campaign Operations
   /**
    * Creates a new campaign with specified configuration
    * @param config Campaign configuration object
    * @returns Promise with campaign creation response
    */
   async createCampaign(config: CampaignConfig): Promise<CampaignResponse> {
-    try {
-      // Validate required campaign fields
-      if (!config.name?.trim()) {
-        throw new FacebookMarketingError(
-          'Campaign name is required',
-          ErrorCodes.VALIDATION_ERROR
-        );
-      }
-
-      // Convert camelCase to snake_case for API params
-      const params = {
-        name: config.name,
-        objective: config.objective,
-        status: config.status,
-        special_ad_categories: config.specialAdCategories || []
-      };
-
-      const response = await this.apiRequest<{id: string}>(
-        `act_${this.config.adAccountId}/campaigns`, 
-        'POST',
-        params
-      );
-
-      // Get the created campaign
-      const campaign = await this.apiRequest<Campaign>(
-        `${response.id}`,
-        'GET',
-        { fields: 'id,name,objective,status,created_time,start_time,stop_time,spend_cap' }
-      );
-
-      return {
-        success: true,
-        id: response.id,
-        data: campaign
-      };
-    } catch (error) {
-      this.handleApiError(error, 'create campaign');
-    }
-  }
-
-  /**
-   * Creates a new ad set within a campaign
-   * @param config Ad set configuration object
-   * @returns Promise with ad set creation response
-   */
-  async createAdSet(config: Partial<AdSetConfig>): Promise<AdSetResponse> {
-    try {
-      const finalConfig = mergeConfig(DEFAULT_ADSET_CONFIG, config);
-      
-      // Convert to snake_case for API
-      const params: Record<string, any> = {
-        name: finalConfig.name,
-        campaign_id: finalConfig.campaignId,
-        status: finalConfig.status || 'PAUSED',
-        targeting: finalConfig.targeting,
-        optimization_goal: finalConfig.optimizationGoal,
-        billing_event: finalConfig.billingEvent
-      };
-
-      // Add budget parameters
-      if (finalConfig.dailyBudget) {
-        params.daily_budget = finalConfig.dailyBudget;
-      }
-      
-      if (finalConfig.lifetimeBudget) {
-        params.lifetime_budget = finalConfig.lifetimeBudget;
-      }
-      
-      // Add schedule parameters
-      if (finalConfig.startTime) {
-        params.start_time = finalConfig.startTime;
-      }
-      
-      if (finalConfig.endTime) {
-        params.end_time = finalConfig.endTime;
-      }
-
-      const response = await this.apiRequest<{id: string}>(
-        `act_${this.config.adAccountId}/adsets`,
-        'POST',
-        params
-      );
-
-      return {
-        id: response.id,
-        success: true
-      };
-    } catch (error) {
-      this.handleApiError(error, 'create ad set');
-    }
-  }
-
-  /**
-   * Creates a new ad within an ad set
-   * @param config Ad configuration object
-   * @returns Promise with ad creation response
-   */
-  async createAd(config: AdConfig): Promise<AdResponse> {
-    try {
-      // Merge creative config while preserving required fields from user config
-      const creative = {
-        ...DEFAULT_CREATIVE_CONFIG,
-        ...config.creative
-      };
-      
-      // First create the creative
-      const creativeParams = {
-        name: creative.name,
-        title: creative.title,
-        body: creative.body,
-        link_url: creative.linkUrl,
-        image_url: creative.imageUrl,
-        call_to_action_type: creative.callToAction
-      };
-      
-      const creativeResponse = await this.apiRequest<{id: string}>(
-        `act_${this.config.adAccountId}/adcreatives`,
-        'POST',
-        creativeParams
-      );
-      
-      // Then create the ad with the creative
-      const adParams = {
-        name: config.name,
-        adset_id: config.adsetId,
-        status: config.status,
-        creative: { creative_id: creativeResponse.id }
-      };
-      
-      const adResponse = await this.apiRequest<{id: string}>(
-        `act_${this.config.adAccountId}/ads`,
-        'POST',
-        adParams
-      );
-
-      return {
-        id: adResponse.id,
-        success: true
-      };
-    } catch (error) {
-      this.handleApiError(error, 'create ad');
-    }
-  }
-
-  /**
-   * Gets all ad sets for a campaign
-   * @param campaignId ID of the campaign
-   * @returns Promise with list of ad sets
-   */
-  async getAdSets(campaignId: string): Promise<AdSet[]> {
-    try {
-      const fields = 'id,name,campaign_id,daily_budget,lifetime_budget,targeting,status';
-      
-      const response = await this.apiRequest<{data: AdSet[]}>(
-        `${campaignId}/adsets`,
-        'GET',
-        { fields }
-      );
-      
-      return response.data || [];
-    } catch (error) {
-      console.error('Error getting ad sets:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Gets all ads for an ad set
-   * @param adSetId ID of the ad set
-   * @returns Promise with list of ads
-   */
-  async getAds(adSetId: string): Promise<Ad[]> {
-    try {
-      const fields = 'id,name,adset_id,creative,status';
-      
-      const response = await this.apiRequest<{data: Ad[]}>(
-        `${adSetId}/ads`,
-        'GET',
-        { fields }
-      );
-      
-      return response.data || [];
-    } catch (error) {
-      console.error('Error getting ads:', error);
-      return [];
-    }
+    return CampaignOperations.createCampaign(
+      this.baseUrl,
+      this.config.adAccountId,
+      this.config.accessToken,
+      config
+    );
   }
 
   /**
@@ -356,17 +91,83 @@ export class FacebookMarketingClient {
    * @returns Promise indicating success/failure
    */
   async pauseCampaign(campaignId: string): Promise<boolean> {
-    try {
-      await this.apiRequest(
-        campaignId,
-        'POST',
-        { status: 'PAUSED' }
-      );
-      return true;
-    } catch (error) {
-      console.error('Error pausing campaign:', error);
-      return false;
-    }
+    return CampaignOperations.pauseCampaign(
+      this.baseUrl,
+      this.config.accessToken,
+      campaignId
+    );
+  }
+
+  /**
+   * Retrieves a specific campaign by ID with all available fields
+   * @param campaignId The ID of the campaign to retrieve
+   * @returns Promise with campaign data
+   */
+  async getCampaign(campaignId: string): Promise<Campaign> {
+    return CampaignOperations.getCampaign(
+      this.baseUrl,
+      this.config.accessToken,
+      campaignId
+    );
+  }
+
+  /**
+   * Retrieves all campaigns for the ad account with full details
+   * @param limit Optional limit on number of campaigns to return
+   * @param status Optional status filter (ACTIVE, PAUSED, etc.)
+   * @returns Promise with array of campaigns
+   */
+  async getCampaigns(limit?: number, status?: CampaignStatus): Promise<Campaign[]> {
+    return CampaignOperations.getCampaigns(
+      this.baseUrl,
+      this.config.adAccountId,
+      this.config.accessToken,
+      limit,
+      status
+    );
+  }
+
+  /**
+   * Updates an existing campaign with new configuration
+   * @param campaignId The ID of the campaign to update
+   * @param config Campaign configuration object with fields to update
+   * @returns Promise with updated campaign data
+   */
+  async updateCampaign(campaignId: string, config: Partial<CampaignConfig>): Promise<CampaignResponse> {
+    return CampaignOperations.updateCampaign(
+      this.baseUrl,
+      this.config.accessToken,
+      campaignId,
+      config
+    );
+  }
+
+  // Ad Set Operations
+  /**
+   * Creates a new ad set within a campaign
+   * @param config Ad set configuration object
+   * @returns Promise with ad set creation response
+   */
+  async createAdSet(config: Partial<AdSetConfig>): Promise<AdSetResponse> {
+    return AdSetOperations.createAdSet(
+      this.baseUrl,
+      this.config.adAccountId,
+      this.config.accessToken,
+      config
+    );
+  }
+
+  /**
+   * Gets all ad sets for a campaign
+   * @param campaignId ID of the campaign
+   * @returns Promise with list of ad sets
+   */
+  async getAdSets(campaignId: string): Promise<AdSet[]> {
+    return AdSetOperations.getAdSets(
+      this.baseUrl,
+      this.config.accessToken,
+      campaignId
+    );
   }
 
   /**
@@ -375,17 +176,83 @@ export class FacebookMarketingClient {
    * @returns Promise indicating success/failure
    */
   async pauseAdSet(adSetId: string): Promise<boolean> {
-    try {
-      await this.apiRequest(
-        adSetId,
-        'POST',
-        { status: 'PAUSED' }
-      );
-      return true;
-    } catch (error) {
-      console.error('Error pausing ad set:', error);
-      return false;
-    }
+    return AdSetOperations.pauseAdSet(
+      this.baseUrl,
+      this.config.accessToken,
+      adSetId
+    );
+  }
+
+  /**
+   * Retrieves a specific ad set by ID with all available fields
+   * @param adSetId The ID of the ad set to retrieve
+   * @returns Promise with ad set data
+   */
+  async getAdSet(adSetId: string): Promise<AdSet> {
+    return AdSetOperations.getAdSet(
+      this.baseUrl,
+      this.config.accessToken,
+      adSetId
+    );
+  }
+
+  /**
+   * Retrieves all ad sets for the ad account with full details
+   * @param limit Optional limit on number of ad sets to return
+   * @param status Optional status filter (ACTIVE, PAUSED, etc.)
+   * @returns Promise with array of ad sets
+   */
+  async getAccountAdSets(limit?: number, status?: string): Promise<AdSet[]> {
+    return AdSetOperations.getAccountAdSets(
+      this.baseUrl,
+      this.config.adAccountId,
+      this.config.accessToken,
+      limit,
+      status
+    );
+  }
+
+  /**
+   * Updates an existing ad set with new configuration settings
+   * @param adSetId The ID of the ad set to update
+   * @param config Ad set configuration with updated fields
+   * @returns Promise with update response
+   */
+  async updateAdSet(adSetId: string, config: Partial<AdSetConfig>): Promise<AdSetResponse> {
+    return AdSetOperations.updateAdSet(
+      this.baseUrl,
+      this.config.accessToken,
+      adSetId,
+      config
+    );
+  }
+
+  // Ad Operations
+  /**
+   * Creates a new ad within an ad set
+   * @param config Ad configuration object
+   * @returns Promise with ad creation response
+   */
+  async createAd(config: AdConfig): Promise<AdResponse> {
+    return AdOperations.createAd(
+      this.baseUrl,
+      this.config.adAccountId,
+      this.config.accessToken,
+      config
+    );
+  }
+
+  /**
+   * Gets all ads for an ad set
+   * @param adSetId ID of the ad set
+   * @returns Promise with list of ads
+   */
+  async getAds(adSetId: string): Promise<Ad[]> {
+    return AdOperations.getAds(
+      this.baseUrl,
+      this.config.accessToken,
+      adSetId
+    );
   }
 
   /**
@@ -394,66 +261,66 @@ export class FacebookMarketingClient {
    * @returns Promise indicating success/failure
    */
   async pauseAd(adId: string): Promise<boolean> {
-    try {
-      await this.apiRequest(
-        adId,
-        'POST',
-        { status: 'PAUSED' }
-      );
-      return true;
-    } catch (error) {
-      console.error('Error pausing ad:', error);
-      return false;
-    }
+    return AdOperations.pauseAd(
+      this.baseUrl,
+      this.config.accessToken,
+      adId
+    );
   }
 
+  /**
+   * Gets all ads for the ad account
+   * @param limit Optional limit on number of ads to return
+   * @param status Optional status filter (ACTIVE, PAUSED, etc.)
+   * @returns Promise with array of ads
+   */
+  async getAccountAds(limit?: number, status?: string): Promise<Ad[]> {
+    return AdOperations.getAccountAds(
+      this.baseUrl,
+      this.config.adAccountId,
+      this.config.accessToken,
+      limit,
+      status
+    );
+  }
+
+  /**
+   * Gets details for a specific ad
+   * @param adId Ad ID
+   * @returns Promise with ad details
+   */
+  async getAd(adId: string): Promise<Ad> {
+    return AdOperations.getAd(
+      this.baseUrl,
+      this.config.accessToken,
+      adId
+    );
+  }
+
+  /**
+   * Updates an existing ad
+   * @param adId Ad ID to update
+   * @param config Ad configuration with updated fields
+   * @returns Promise with update response
+   */
+  async updateAd(adId: string, config: Partial<AdConfig>): Promise<AdResponse> {
+    return AdOperations.updateAd(
+      this.baseUrl,
+      this.config.accessToken,
+      adId,
+      config
+    );
+  }
+
+  // Account Operations
   /**
    * Gets all available ad accounts for the current user
    * @returns Promise with list of ad accounts
    */
   async getAvailableAdAccounts(): Promise<any[]> {
-    try {
-      console.log('Fetching ad accounts from Graph API...');
-      
-      const fields = 'id,name,account_status,amount_spent,currency';
-      
-      const response = await this.apiRequest<{data: any[]}>(
-        'me/adaccounts',
-        'GET',
-        { fields }
-      );
-      
-      return response.data || [];
-    } catch (error) {
-      console.error('Error getting ad accounts:', error);
-      this.handleApiError(error, 'get ad accounts');
-      return [];
-    }
-  }
-
-  /**
-   * Gets all campaigns for an ad account
-   * @returns Promise with list of campaigns
-   */
-  async getCampaigns(): Promise<any[]> {
-    try {
-      console.log('Fetching campaigns from Graph API...');
-      
-      console.log(`Fetching campaigns for ad account: act_${this.config.adAccountId}`);
-      
-      const fields = 'id,name,objective,status,created_time,start_time,stop_time,spend_cap';
-      
-      const response = await this.apiRequest<{data: any[]}>(
-        `act_${this.config.adAccountId}/campaigns`,
-        'GET',
-        { fields, limit: '100' }
-      );
-      
-      return response.data || [];
-    } catch (error) {
-      console.error('Error getting campaigns:', error);
-      this.handleApiError(error, 'get campaigns');
-      return [];
-    }
+    return AccountOperations.getAvailableAdAccounts(
+      this.baseUrl,
+      this.config.accessToken
+    );
   }
 } 

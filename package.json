@@ -22,7 +22,9 @@
     "type-check": "tsc --noEmit",
     "list-accounts": "ts-node src/scripts/list-accounts.ts",
     "list-campaigns": "ts-node src/scripts/list-campaigns.ts",
-    "generate-token-url": "ts-node src/scripts/generate-token-url.ts"
+    "generate-token-url": "ts-node src/scripts/generate-token-url.ts",
+    "create-campaign": "ts-node src/scripts/create-campaign.ts",
+    "create-adset": "ts-node src/scripts/create-adset.ts"
   },
   "keywords": [
     "facebook",
@@ -35,6 +37,9 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.9.0",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "dayjs": "^1.11.13",
     "dotenv": "^16.0.3"
   },
   "devDependencies": {
@@ -153,6 +158,19 @@
           "adSetId": {
             "type": "string",
             "description": "ID of the ad set to pause"
+          }
+        }
+      },
+      "updateAdSet": {
+        "description": "Update an existing ad set with new settings",
+        "parameters": {
+          "adSetId": {
+            "type": "string", 
+            "description": "ID of the ad set to update"
+          },
+          "config": {
+            "type": "object",
+            "description": "Updated ad set configuration"
           }
         }
       },

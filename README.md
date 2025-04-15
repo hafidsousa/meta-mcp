@@ -202,6 +202,93 @@ Pause the Facebook ad set with ID 123456789
 Pause the Facebook ad with ID 123456789
 ```
 
+## Facebook Marketing API Implementation Status
+
+### Current Implementation Status
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| **Authentication** | ✅ Complete | Using access tokens with proper validation |
+| **Campaign Management** | ✅ Complete | Full CRUD with proper field validation |
+| **Ad Set Management** | ⚠️ Partial | Basic functionality implemented |
+| **Ad Creation** | ⚠️ Partial | Simple ad creation working |
+| **Creatives** | ⚠️ Partial | Basic image ads supported |
+| **Targeting** | ⚠️ Partial | Basic demographic targeting implemented |
+| **Custom Audiences** | ❌ Not Started | Planned for Phase 2 |
+| **Insights & Analytics** | ❌ Not Started | Planned for Phase 3 |
+| **Lead Generation** | ❌ Not Started | Planned for Phase 5 |
+| **Compliance Features** | ❌ Not Started | Planned for Phase 5 |
+| **Dashboard Integration** | ❌ Not Started | Planned for Phase 6 |
+
+### Available Facebook Marketing API Endpoints
+
+#### Campaign Management
+```
+POST /act_{ad_account_id}/campaigns - Create new campaigns
+GET /act_{ad_account_id}/campaigns - List all campaigns
+GET /{campaign_id} - Get campaign details
+POST /{campaign_id} - Update campaign
+DELETE /{campaign_id} - Delete campaign
+```
+
+#### Ad Set Management
+```
+POST /act_{ad_account_id}/adsets - Create new ad sets
+GET /act_{ad_account_id}/adsets - List all ad sets
+GET /{campaign_id}/adsets - Get ad sets in campaign
+GET /{adset_id} - Get ad set details
+POST /{adset_id} - Update ad set
+DELETE /{adset_id} - Delete ad set
+```
+
+#### Ad Management
+```
+POST /act_{ad_account_id}/ads - Create new ads ✅
+GET /act_{ad_account_id}/ads - List all ads ✅
+GET /{adset_id}/ads - Get ads in ad set ✅
+GET /{ad_id} - Get ad details ✅
+POST /{ad_id} - Update ad ✅
+DELETE /{ad_id} - Delete ad
+```
+
+#### Creative Management
+```
+POST /act_{ad_account_id}/adcreatives - Create ad creatives
+GET /act_{ad_account_id}/adcreatives - List ad creatives
+GET /{creative_id} - Get creative details
+POST /{creative_id} - Update creative
+```
+
+#### Targeting
+```
+GET /act_{ad_account_id}/targetingbrowse - Browse targeting options
+GET /act_{ad_account_id}/targetingsearch - Search targeting options
+GET /act_{ad_account_id}/targetingvalidation - Validate targeting specifications
+```
+
+#### Insights & Analytics
+```
+GET /{campaign_id}/insights - Get campaign performance data
+GET /{adset_id}/insights - Get ad set performance data
+GET /{ad_id}/insights - Get ad performance data
+GET /act_{ad_account_id}/insights - Get account-level insights
+```
+
+#### Audience Management
+```
+GET /act_{ad_account_id}/customaudiences - List custom audiences
+POST /act_{ad_account_id}/customaudiences - Create custom audience
+GET /act_{ad_account_id}/lookalikaudiences - List lookalike audiences
+POST /act_{ad_account_id}/lookalikaudiences - Create lookalike audience
+```
+
+#### Special Features
+```
+GET /act_{ad_account_id}/delivery_estimate - Estimate ad delivery performance
+GET /act_{ad_account_id}/adspixels - Manage conversion tracking pixels
+POST /act_{ad_account_id}/leadgen_forms - Create lead generation forms
+```
+
 ## Available Tools
 
 | Tool | Description |
@@ -303,3 +390,39 @@ npm run generate-token-url
 | FB_AD_ACCOUNT_ID | Facebook Ad Account ID | Yes |
 | FB_APP_ID | Facebook App ID | No |
 | FB_APP_SECRET | Facebook App Secret | No |
+
+## Command-line Scripts
+
+Meta MCP includes several command-line scripts to help you work with the Facebook Marketing API:
+
+### Utility Scripts
+
+- `npm run list-accounts` - List all available ad accounts
+- `npm run list-campaigns` - List all campaigns for the configured ad account
+- `npm run generate-token-url` - Generate a URL to obtain a Facebook access token
+- `npm run create-campaign` - Create a simple test campaign
+
+### Ad Set Creation Script
+
+Create an ad set with specific targeting parameters:
+
+```bash
+npm run create-adset -- --campaign-id=123456789 --name="Summer Sale" --daily-budget=75 --countries=US,CA --age-min=25 --age-max=55 --gender=female
+```
+
+Available parameters:
+- `--campaign-id` (required): Facebook Campaign ID
+- `--name`: Custom name for the ad set
+- `--daily-budget`: Daily budget in dollars (default: 50.00)
+- `--countries`: Comma-separated list of country codes (default: US)
+- `--age-min`: Minimum age for targeting (default: 18)
+- `--age-max`: Maximum age for targeting (default: 65)
+- `--gender`: Gender targeting (all, male, female) (default: all)
+- `--optimization`: Optimization goal (default: CONVERSIONS)
+- `--billing`: Billing event (default: IMPRESSIONS)
+- `--status`: Initial status (ACTIVE, PAUSED) (default: PAUSED)
+
+To see all available options:
+```bash
+npm run create-adset -- --help
+```

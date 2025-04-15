@@ -2,6 +2,11 @@ export * from './client';
 export * from './config';
 export * from './types';
 export * from './server';
+export * from './utils/api';
+export * from './operations/campaign';
+export * from './operations/adset';
+export * from './operations/ad';
+export * from './operations/account';
 
 // Re-export commonly used types
 export type {

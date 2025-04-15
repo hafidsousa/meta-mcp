@@ -16,14 +16,34 @@ The project follows a modular architecture with clearly separated concerns:
 
 ### Code Organization
 - `/src`: Source code directory
-  - `/api`: Facebook Marketing API integration
-  - `/mcp`: MCP server implementation
-  - `/config`: Configuration management
-  - `/handlers`: Operation handlers
+  - `/operations`: Domain-specific operation modules
+    - `/campaign.ts`: Campaign-specific operations
+    - `/adset.ts`: Ad Set specific operations
+    - `/ad.ts`: Ad specific operations
+    - `/account.ts`: Account management operations
   - `/utils`: Utility functions
-  - `/types`: TypeScript type definitions
+    - `/api.ts`: API request utilities and error handling
+  - `/config.ts`: Configuration management, environment loading, and logging utilities
+  - `/tools.ts`: MCP tool schema definitions
+  - `/handlers.ts`: MCP request handlers implementation
+  - `/types.ts`: TypeScript type definitions
+  - `/client.ts`: Main client facade
+  - `/server.ts`: Slim main file for server setup and initialization
+
+### Design Patterns
+- **Facade Pattern**: Client class provides a simplified interface to subsystems
+- **Module Pattern**: Related functionality grouped in specific modules
+- **Command Pattern**: For handling different advertising operations
+- **Factory Pattern**: For creating API client instances
 
 ## Implementation Guidelines
+
+### Module Organization
+- Each module should be under 300 lines for maintainability
+- Consistent parameter ordering (baseUrl, adAccountId, accessToken, config)
+- Centralized error handling in API utilities module
+- Domain-specific operations in their own modules
+- Client class should use facade pattern to delegate to operation modules
 
 ### TypeScript Usage
 - Use strict typing for all functions and interfaces
@@ -34,14 +54,15 @@ The project follows a modular architecture with clearly separated concerns:
 
 ### Error Handling
 - Use structured error responses
+- Centralize error handling in utils/api.ts
 - Categorize errors (API, validation, server)
 - Provide detailed error messages
 - Implement graceful fallbacks
 - Log errors with appropriate severity
 
 ### Testing Strategy
-- Unit tests for individual components
-- Integration tests for API communication
+- Unit tests for individual modules
+- Integration tests for module boundaries
 - Mock tests for Facebook API
 - End-to-end tests for MCP commands
 - Performance tests for critical paths
@@ -54,6 +75,13 @@ The project follows a modular architecture with clearly separated concerns:
 - Validate input before API calls
 - Implement retry logic for transient errors
 - Cache responses when appropriate
+
+### Code Maintainability
+- Follow module size constraint of 300 lines maximum
+- Use consistent naming conventions across modules
+- Maintain clear separation of concerns
+- Implement proper documentation for all modules
+- Use facade pattern for simplifying client API
 
 ### MCP Commands
 - Validate command parameters
@@ -82,5 +110,6 @@ The project follows a modular architecture with clearly separated concerns:
 - Clear API documentation
 - Comprehensive usage examples
 - Detailed configuration guide
+- Architecture and module organization
 - Troubleshooting information
 - Security best practices 
