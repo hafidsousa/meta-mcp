@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/hafidsousa/meta-mcp/compare/v1.6.0...v1.7.0) (2025-04-15)
+
+
+### Features
+
+* Enhance documentation and error handling in Facebook Marketing API integration ([17b264a](https://github.com/hafidsousa/meta-mcp/commit/17b264a5d93a256bf75f8f4f88f991ef13f3debe))
+
 # [1.6.0](https://github.com/hafidsousa/meta-mcp/compare/v1.5.0...v1.6.0) (2025-04-15)
 
 
