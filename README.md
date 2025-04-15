@@ -426,3 +426,32 @@ To see all available options:
 ```bash
 npm run create-adset -- --help
 ```
+
+## Documentation
+
+### Reference Documentation
+
+This package includes comprehensive documentation in the `docs/` directory:
+
+- **Tool Reference**: Generated documentation for all available tools in both JSON and Markdown formats
+- **Entity Reference**: Detailed information about campaigns, ad sets, ads, and ad accounts
+
+### Generating Documentation
+
+You can generate or update the documentation using the included tools:
+
+```bash
+# Generate JSON documentation
+npm run generate-docs
+
+# Generate JSON documentation to file
+npm run generate-docs -- --file
+
+# Generate Markdown documentation (after generating JSON)
+npm run generate-markdown-docs
+
+# Generate both JSON and Markdown documentation
+npm run docs
+```
+
+The generated documentation will be available in the `docs/` directory.

@@ -274,7 +274,7 @@ export async function updateAd(
   config: Partial<AdConfig>
 ): Promise<AdResponse> {
   try {
-    // Prepare the update parameters
+    // Prepare parameters
     const params: Record<string, any> = humps.decamelizeKeys({
       name: config.name,
       status: config.status,
@@ -288,25 +288,16 @@ export async function updateAd(
     
     // Handle creative separately since it needs a different update approach
     if (config.creative) {
-      // Need to create a new creative
-      const creativeParams = humps.decamelizeKeys({
-        name: config.creative.name,
-        title: config.creative.title,
-        body: config.creative.body,
-        linkUrl: config.creative.linkUrl,
-        imageUrl: config.creative.imageUrl,
-        callToActionType: config.creative.callToAction,
-        urlTags: config.creative.urlTags,
-        objectStorySpec: config.creative.objectStorySpec,
-        format: config.creative.format
-      });
-      
       // Update or create the ad creative
       const ad: Ad = await getAd(baseUrl, accessToken, adId);
       
-      // If the ad has a creative, use its ID
-      if (ad.creative && typeof ad.creative === 'object' && 'id' in ad.creative) {
-        params.creative = { creative_id: ad.creative.id };
+      // If the ad has a creative with an ID property
+      if (ad.creative && typeof ad.creative === 'object' && ad.creative !== null) {
+        // Use a type assertion to tell TypeScript the structure
+        const creativeObj = ad.creative as { id: string };
+        if ('id' in creativeObj) {
+          params.creative = { creative_id: creativeObj.id };
+        }
       }
     }
     

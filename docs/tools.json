@@ -1,0 +1,360 @@
+[
+  {
+    "name": "createCampaign",
+    "description": "Creates a new Facebook ad campaign. This is the first step in the ad creation process. A campaign defines the overall objective and budget strategy.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "description": "Campaign configuration object"
+        }
+      },
+      "required": [
+        "config"
+      ]
+    }
+  },
+  {
+    "name": "getCampaigns",
+    "description": "Gets all campaigns for the ad account. Returns an array of campaign objects with their IDs, names, status, and other details.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "number",
+          "description": "Maximum number of campaigns to return (default: 25, max: 100)"
+        },
+        "status": {
+          "type": "string",
+          "description": "Filter campaigns by status",
+          "enum": [
+            "ACTIVE",
+            "PAUSED",
+            "DELETED",
+            "ARCHIVED"
+          ]
+        },
+        "campaignId": {
+          "type": "string",
+          "description": "ID of the campaign"
+        }
+      },
+      "required": [
+        "campaignId"
+      ]
+    }
+  },
+  {
+    "name": "getCampaign",
+    "description": "Gets details for a specific campaign by ID.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "campaignId": {
+          "type": "string",
+          "description": "ID of the campaign"
+        }
+      },
+      "required": [
+        "campaignId"
+      ]
+    }
+  },
+  {
+    "name": "pauseCampaign",
+    "description": "Pauses an active campaign, which also pauses all associated ad sets and ads.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "campaignId": {
+          "type": "string",
+          "description": "ID of the campaign"
+        }
+      },
+      "required": [
+        "campaignId"
+      ]
+    }
+  },
+  {
+    "name": "updateCampaign",
+    "description": "Updates an existing campaign with new configuration values.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "description": "Campaign configuration object"
+        },
+        "campaignId": {
+          "type": "string",
+          "description": "ID of the campaign"
+        }
+      },
+      "required": [
+        "config",
+        "campaignId"
+      ]
+    }
+  },
+  {
+    "name": "createAdSet",
+    "description": "Creates a new ad set within a campaign. Ad sets define targeting, budget, scheduling, and bidding for your ads.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "description": "AdSet configuration object"
+        }
+      },
+      "required": [
+        "config"
+      ]
+    }
+  },
+  {
+    "name": "getAdSets",
+    "description": "Gets all ad sets for a specific campaign.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "campaignId": {
+          "type": "string",
+          "description": "ID of the campaign"
+        },
+        "adSetId": {
+          "type": "string",
+          "description": "ID of the ad set"
+        }
+      },
+      "required": [
+        "adSetId"
+      ]
+    }
+  },
+  {
+    "name": "getAdSet",
+    "description": "Gets details for a specific ad set by ID.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "adSetId": {
+          "type": "string",
+          "description": "ID of the ad set"
+        }
+      },
+      "required": [
+        "adSetId"
+      ]
+    }
+  },
+  {
+    "name": "getAccountAdSets",
+    "description": "Gets all ad sets for the configured ad account.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "number",
+          "description": "Maximum number of ad sets to return"
+        },
+        "status": {
+          "type": "string",
+          "description": "Filter ad sets by status",
+          "enum": [
+            "ACTIVE",
+            "PAUSED",
+            "DELETED",
+            "ARCHIVED"
+          ]
+        },
+        "adSetId": {
+          "type": "string",
+          "description": "ID of the ad set"
+        }
+      },
+      "required": [
+        "adSetId"
+      ]
+    }
+  },
+  {
+    "name": "pauseAdSet",
+    "description": "Pauses an active ad set and all its ads.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "adSetId": {
+          "type": "string",
+          "description": "ID of the ad set"
+        }
+      },
+      "required": [
+        "adSetId"
+      ]
+    }
+  },
+  {
+    "name": "updateAdSet",
+    "description": "Updates an existing ad set with new configuration values.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "description": "AdSet configuration object"
+        },
+        "adSetId": {
+          "type": "string",
+          "description": "ID of the ad set"
+        }
+      },
+      "required": [
+        "config",
+        "adSetId"
+      ]
+    }
+  },
+  {
+    "name": "createAd",
+    "description": "Creates a new ad within an ad set. Ads are the actual content shown to users.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "description": "Ad configuration object"
+        }
+      },
+      "required": [
+        "config"
+      ]
+    }
+  },
+  {
+    "name": "getAds",
+    "description": "Gets all ads for a specific ad set.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "adSetId": {
+          "type": "string",
+          "description": "ID of the ad set"
+        },
+        "adId": {
+          "type": "string",
+          "description": "ID of the ad"
+        }
+      },
+      "required": [
+        "adId"
+      ]
+    }
+  },
+  {
+    "name": "getAd",
+    "description": "Gets details for a specific ad by ID.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "adId": {
+          "type": "string",
+          "description": "ID of the ad"
+        }
+      },
+      "required": [
+        "adId"
+      ]
+    }
+  },
+  {
+    "name": "getAccountAds",
+    "description": "Gets all ads for the configured ad account.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "number",
+          "description": "Maximum number of ads to return"
+        },
+        "status": {
+          "type": "string",
+          "description": "Filter ads by status",
+          "enum": [
+            "ACTIVE",
+            "PAUSED",
+            "DELETED",
+            "ARCHIVED"
+          ]
+        },
+        "adId": {
+          "type": "string",
+          "description": "ID of the ad"
+        }
+      },
+      "required": [
+        "adId"
+      ]
+    }
+  },
+  {
+    "name": "pauseAd",
+    "description": "Pauses an active ad.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "adId": {
+          "type": "string",
+          "description": "ID of the ad"
+        }
+      },
+      "required": [
+        "adId"
+      ]
+    }
+  },
+  {
+    "name": "updateAd",
+    "description": "Updates an existing ad with new configuration values.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "description": "Ad configuration object"
+        },
+        "adId": {
+          "type": "string",
+          "description": "ID of the ad"
+        }
+      },
+      "required": [
+        "config",
+        "adId"
+      ]
+    }
+  },
+  {
+    "name": "getAvailableAdAccounts",
+    "description": "Gets all available ad accounts for the current user or page.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "description": "Facebook configuration object"
+        },
+        "adId": {
+          "type": "string",
+          "description": "ID of the ad"
+        }
+      },
+      "required": [
+        "config",
+        "adId"
+      ]
+    }
+  }
+]

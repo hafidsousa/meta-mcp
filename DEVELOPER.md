@@ -9,14 +9,29 @@ meta-mcp/
 ├── src/                 # Core library code
 │   ├── client.ts        # FacebookMarketingClient implementation
 │   ├── config.ts        # Default configurations
-│   ├── create-campaign.ts # Example script for creating campaigns
 │   ├── errors.ts        # Error handling
+│   ├── handlers.ts      # MCP request handlers
 │   ├── index.ts         # Library exports
-│   ├── list-accounts.ts # CLI tool for listing accounts
-│   ├── list-campaigns.ts # CLI tool for listing campaigns
 │   ├── server.ts        # MCP server implementation
+│   ├── tools.ts         # Tool definitions
 │   ├── types.ts         # Type definitions
-│   └── types/           # Additional type definitions
+│   ├── operations/      # API operations organized by entity
+│   ├── scripts/         # CLI scripts and utilities
+│   │   ├── create-adset.ts          # Create ad set script
+│   │   ├── create-campaign.ts       # Create campaign script
+│   │   ├── generate-docs.ts         # Documentation generator
+│   │   ├── generate-token-url.ts    # Token URL generator
+│   │   ├── list-accounts.ts         # List accounts script
+│   │   └── list-campaigns.ts        # List campaigns script
+│   ├── types/           # Additional type definitions
+│   └── utils/           # Utility functions
+│       └── docgen.ts    # Documentation generation utility
+├── docs/                # Generated documentation
+│   ├── ad.md            # Ad documentation
+│   ├── ad-account.md    # Ad account documentation
+│   ├── ad-campaign.md   # Campaign documentation
+│   ├── ad-set.md        # Ad set documentation
+│   └── tools.json       # Generated tool definitions
 ├── .env.example         # Environment variable template
 ├── package.json         # Package configuration
 ├── README.md            # Main README for MCP clients
@@ -190,4 +205,45 @@ This will run the `prepublishOnly` script to build the package and then publish 
 
 ## License
 
-MIT License - See LICENSE file for details. 
+MIT License - See LICENSE file for details.
+
+## Documentation Generation
+
+The project includes a documentation generation system that creates standardized tool definitions from TypeScript types. This helps keep documentation in sync with the actual code.
+
+### Generate Tool Documentation
+
+To generate documentation:
+
+```bash
+# Output to console
+npm run generate-docs
+
+# Output to docs/tools.json file
+npm run generate-docs -- --file
+```
+
+### How Docgen Works
+
+The documentation generator (`src/utils/docgen.ts`) performs the following functions:
+
+1. Reads TypeScript types and interfaces from the codebase
+2. Generates standardized tool definitions with proper schemas
+3. Creates documentation in JSON format that can be used by MCP clients
+
+The `generateToolFromType` function creates tool definitions from TypeScript types, ensuring that parameters, types, and descriptions are accurate.
+
+### Updating Documentation
+
+When making changes to the API:
+
+1. Update the relevant TypeScript types in `src/types/`
+2. Run the documentation generator to update `docs/tools.json`
+3. If necessary, update the Markdown files in the `docs/` directory
+
+### Best Practices
+
+- Always keep documentation in sync with code changes
+- When adding new parameters or tools, include detailed descriptions
+- Use JSDoc comments in your code to improve the generated documentation
+- Run the documentation generator before committing changes 
