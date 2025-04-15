@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/hafidsousa/meta-mcp/compare/v1.4.0...v1.5.0) (2025-04-15)
+
+
+### Features
+
+* Standardize MCP tool schemas and enhance campaign management ([0c7d444](https://github.com/hafidsousa/meta-mcp/commit/0c7d4441e5904eb81338761f462dffafabd5f5f6))
+
 # [1.4.0](https://github.com/hafidsousa/meta-mcp/compare/v1.3.0...v1.4.0) (2025-04-15)
 
 
