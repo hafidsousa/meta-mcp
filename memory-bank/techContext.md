@@ -1,201 +1,114 @@
 # Facebook Marketing MCP Server - Technical Context
 
-## Technologies Used
-1. **Node.js**: Runtime environment (v18 or higher)
-2. **TypeScript**: Programming language
-3. **Facebook Graph API**: Direct API integration with Facebook API v22.0
-4. **Cursor IDE**: Development environment
-5. **MCP Framework**: Cursor IDE integration framework
-6. **@modelcontextprotocol/sdk**: Official MCP SDK for standardized tool integration
+## Core Technologies
+1. **Node.js**: Runtime environment
+2. **TypeScript**: Primary programming language
+3. **Facebook Marketing API**: Advertising platform API
+4. **Model Context Protocol (MCP)**: Framework for tool integration with Cursor IDE
+5. **JSON Schema**: Used for input validation
+6. **humps**: For reliable case conversion between camelCase and snake_case
 
-## Development Setup
-1. **Node.js Environment**
-   - Version: 18 or higher
-   - Package Manager: npm
-   - TypeScript Support
+## Libraries & Dependencies
+1. **dotenv**: Environment variables management
+2. **@modelcontextprotocol/sdk**: MCP integration framework
+3. **node-fetch**: For API requests
+4. **jest**: Testing framework
+5. **typescript**: TypeScript compiler
+6. **ts-node**: TypeScript execution
+7. **express**: Web server for MCP endpoints
+8. **cors**: Cross-origin resource sharing
+9. **humps**: Case conversion library (camelCase ↔ snake_case)
 
-2. **Dependencies**
-   - dotenv: ^16.0.0
-   - @types/node: ^20.0.0
-   - typescript: ^5.0.0
-   - eslint: ^8.0.0
-   - @modelcontextprotocol/sdk: ^0.3.0
+## Development Environment
+1. **Node.js 18+**: Runtime environment
+2. **npm**: Package management
+3. **TypeScript 5.0+**: Type checking and compilation
+4. **VS Code**: Recommended IDE
+5. **ESLint**: Code linting
+6. **Prettier**: Code formatting
+7. **Jest**: Testing framework
 
-3. **Development Tools**
-   - TypeScript compiler
-   - ESLint for code linting
-   - ts-node for development
-   - npm scripts for build and test
+## Facebook Marketing API
+The project integrates with Facebook's Marketing API v22.0, which provides programmatic access to create and manage ads. Key aspects include:
 
-## Project Structure
-1. **Core Files**
-   - `src/server.ts`: Main MCP server implementation (slim central file that sets up and runs the server)
-   - `src/client.ts`: Facebook Marketing API client (facade)
-   - `src/types.ts`: Type definitions
-   - `src/errors.ts`: Error handling utilities
-   - `src/config.ts`: Configuration management, environment variables loading, and logging utilities
-   - `src/tools.ts`: All tool schema definitions
-   - `src/handlers.ts`: Implementation of MCP request handlers
-   - `src/index.ts`: Main export file
+1. **Authentication**
+   - OAuth 2.0 authentication
+   - Long-lived access tokens
+   - Permissioned access based on app roles
 
-2. **Modular Operations**
-   - `src/utils/api.ts`: API request utilities and error handling
-   - `src/operations/campaign.ts`: Campaign-specific operations
-   - `src/operations/adset.ts`: Ad Set specific operations
-   - `src/operations/ad.ts`: Ad specific operations
-   - `src/operations/account.ts`: Account management operations
+2. **Ad Account Management**
+   - Discover available ad accounts
+   - Get account details
+   - Access spending limits
 
-3. **Script Files**
-   - `src/scripts/list-accounts.ts`: Utility to list available ad accounts
-   - `src/scripts/list-campaigns.ts`: Utility to list campaigns
-   - `src/scripts/create-campaign.ts`: Campaign creation script
-   - `src/scripts/generate-token-url.ts`: Auth token URL generator
-   - `src/scripts/test-mcp.ts`: Test script for MCP server
-
-4. **Build Output**
-   - `dist/`: Compiled JavaScript files
-   - `dist/types/`: TypeScript declaration files
-
-## Architecture Principles
-1. **Modular Design**
-   - Each operation type (campaign, ad set, ad) in separate modules
-   - Common utilities in shared modules
-   - Client as facade to simplify API access
-   - All modules under 300 lines for maintainability
-
-2. **Consistent Patterns**
-   - Consistent parameter ordering (baseUrl, adAccountId, accessToken, config)
-   - Standard error handling across all modules
-   - Uniform function signatures and return types
-   - Clear separation between API requests and business logic
-
-3. **Code Organization**
-   - Related functionality grouped in specific modules
-   - API utilities shared across operation modules
-   - Each file with clear, single responsibility
-   - Facade pattern in client.ts for simplified API
-
-## Documentation
-
-1. **README.md**
-   - Main documentation for MCP clients
-   - Installation instructions
-   - Configuration examples
-   - Usage examples
-
-2. **DEVELOPER.md**
-   - Detailed documentation for developers
-   - Project structure overview
-   - Local development setup
-   - Testing procedures
-   - Publishing instructions
-   - Library architecture details
-   - Contribution guidelines
-
-3. **/docs/ Directory**
-   - Canonical reference for API specifications
-   - Entity-specific documentation (ad-account.md, ad-campaign.md, ad-set.md, ad.md)
-   - AI assistants MUST consult these files for API specifications
-   - Links to official Facebook Marketing API references
-   - Implementation guidance for AI assistants
-   - Current as of Facebook Marketing API v22.0
-
-## Technical Constraints
-1. **API Limitations**
-   - Facebook Graph API rate limits
-   - API version compatibility (v22.0)
-   - Authentication requirements
-
-2. **Environment Requirements**
-   - Node.js version
-   - Facebook API credentials
-   - Cursor IDE compatibility
-   - MCP SDK compatibility
-
-3. **Security Constraints**
-   - Secure credential management
-   - API token handling
-   - Minimal required credentials
-
-## Dependencies
-```json
-{
-  "dependencies": {
-    "dotenv": "^16.0.0",
-    "@modelcontextprotocol/sdk": "^0.3.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.0.0",
-    "typescript": "^5.0.0",
-    "ts-node": "^10.9.0"
-  }
-}
-```
-
-## Build Process
-1. TypeScript compilation
-2. ESLint validation
-3. Package preparation
-4. Distribution build
-
-## Configuration Requirements
-1. **Environment Variables**
-   - FB_ACCESS_TOKEN (required)
-   - FB_AD_ACCOUNT_ID (required)
-   - FB_APP_ID (optional with MCP tools)
-   - FB_APP_SECRET (optional with MCP tools)
-
-2. **Cursor IDE Configuration**
-   - MCP server registration
-   - Command configuration
-   - Transport settings
-
-## API Integration
-1. **Facebook Marketing API**
-   - Authentication
-   - Campaign management
-   - Ad set operations
-   - Ad creation
-   - Analytics retrieval
-   - Ad account discovery
-
-2. **Cursor IDE MCP**
-   - Command interface
-   - Response handling
-   - Error management
-   - Configuration integration
-   - Ad account management tools
-   - MCP SDK integration
-
-## Facebook Marketing API Types
-1. **Campaign**
-   - Core campaign configuration
-   - Objective targeting (CONVERSIONS, LINK_CLICKS, etc.)
-   - Budget management (spend_cap)
-   - Status control (ACTIVE, PAUSED)
+3. **Campaign Management**
+   - Campaign objectives and budgeting
+   - Campaign lifecycle management
+   - Campaign targeting options
    - Special ad categories handling
 
-2. **Ad Set**
-   - Targeting configuration (demographics, interests, behaviors)
-   - Budget management (daily_budget, lifetime_budget)
-   - Scheduling (start_time, end_time, ad_schedules)
-   - Bidding strategy (bid_amount, bid_strategy)
-   - Optimization goals (CONVERSIONS, IMPRESSIONS, LINK_CLICKS)
-   - Billing events (IMPRESSIONS, LINK_CLICKS)
-   - Platforms and placements (facebook, instagram, audience_network)
-   - Position targeting (feed, story, reels, etc.)
-   - Advanced optimization settings (attribution_spec, pacing_type)
+4. **Ad Set Management**
+   - Audience targeting and demographics
+   - Placement options
+   - Budget and scheduling
+   - Optimization goals
 
-3. **Ad Creative**
-   - Ad content (title, body)
-   - Media assets (image_url, video_url)
-   - Call to action configuration
-   - Format settings (single_image, carousel, video)
-   - URL parameters and tracking
-   - Object story specs for Page post ads
+5. **Ad Management**
+   - Creative management
+   - Ad formats and specifications
+   - Tracking and analytics
+   - Dynamic creative options
+
+## Project Structure
+1. **src/**: Source code
+   - **operations/**: Domain-specific operations (campaign, adset, ad, account)
+   - **utils/**: Utility functions and helpers
+   - **types.ts**: Type definitions
+   - **client.ts**: Main client facade
+   - **config.ts**: Configuration management
+   - **tools.ts**: MCP tool definitions
+   - **handlers.ts**: MCP request handlers
+   - **server.ts**: MCP server setup
+
+2. **scripts/**: Utility scripts
+   - **list-accounts.ts**: List available ad accounts
+   - **generate-token-url.ts**: Generate authentication URLs
+   - **test-mcp.ts**: Test MCP server functionality
+
+3. **dist/**: Compiled JavaScript output
+
+4. **tests/**: Test files
+   - **unit/**: Unit tests
+   - **integration/**: Integration tests
+   - **mocks/**: Mock data for tests
+
+5. **docs/**: Documentation
+   - **api/**: API specifications
+   - **facebook/**: Facebook API reference
+   - **examples/**: Usage examples
+
+## Data Models
+The system works with several key data models that map to Facebook Marketing API entities:
+
+1. **Ad Account**
+   - Identifier and name
+   - Currency and spending limits
+   - Account status
+   - Business relationship
+
+2. **Campaign**
+   - Objective and strategy
+   - Budget and timing
+   - Status management
+   - Special ad categories
+   - Campaign type
+
+3. **Ad Set**
+   - Target audience definition
+   - Budget allocation
+   - Bidding strategy
+   - Schedule and pacing
+   - Optimization goals
 
 4. **Ad**
    - Creative association
@@ -223,6 +136,20 @@
    - Endpoint: /tools/invoke for executing tool calls
    - Structured error handling
    - Input parameter validation
+
+## Case Conversion
+1. **Library**: humps v2.0.1
+2. **Purpose**:
+   - Convert between camelCase (JS/TS standard) and snake_case (FB API requirement)
+   - Handle nested objects and arrays recursively
+   - Maintain type safety throughout conversion
+3. **Key functions**:
+   - `humps.decamelizeKeys()`: Converts camelCase to snake_case
+   - `humps.camelizeKeys()`: Converts snake_case to camelCase
+4. **Implementation**:
+   - Used in all operation modules (campaign.ts, adset.ts, ad.ts)
+   - Applied to API request parameters before sending to Facebook
+   - Properly handles nested targeting objects
 
 ## MCP Tools
 1. **Ad Account Management**

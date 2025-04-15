@@ -1,10 +1,14 @@
 /**
  * @fileoverview Ad operations for Facebook Marketing API
+ * 
+ * @note IMPORTANT: All fields in request payloads must be in camelCase format.
+ * The API client will convert them to snake_case as needed for the Facebook API.
  */
 
 import { Ad, AdConfig, AdResponse } from '../types';
 import { apiRequest, handleApiError } from '../utils/api';
 import { DEFAULT_CREATIVE_CONFIG } from '../config';
+import * as humps from 'humps';
 
 /**
  * Creates a new ad within an ad set
@@ -27,36 +31,18 @@ export async function createAd(
       ...config.creative
     };
     
-    // First create the creative
-    const creativeParams: Record<string, any> = {
+    // First create the creative - convert camelCase to snake_case using humps
+    const creativeParams = humps.decamelizeKeys({
       name: creative.name,
       title: creative.title,
       body: creative.body,
-      link_url: creative.linkUrl,
-      image_url: creative.imageUrl,
-      call_to_action_type: creative.callToAction
-    };
-    
-    // Add URL parameters if specified
-    if (creative.urlTags) {
-      creativeParams.url_tags = creative.urlTags;
-    }
-    
-    // Add object story spec if available
-    if (creative.objectStorySpec) {
-      // Convert camelCase to snake_case
-      const objectStorySpec: Record<string, any> = {};
-      Object.entries(creative.objectStorySpec).forEach(([key, value]) => {
-        const snakeCaseKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-        objectStorySpec[snakeCaseKey] = value;
-      });
-      creativeParams.object_story_spec = objectStorySpec;
-    }
-    
-    // Add format if specified
-    if (creative.format) {
-      creativeParams.format = creative.format;
-    }
+      linkUrl: creative.linkUrl,
+      imageUrl: creative.imageUrl,
+      callToActionType: creative.callToAction,
+      urlTags: creative.urlTags,
+      objectStorySpec: creative.objectStorySpec,
+      format: creative.format
+    });
     
     const creativeResponse = await apiRequest<{id: string}>(
       baseUrl,
@@ -66,23 +52,19 @@ export async function createAd(
       creativeParams
     );
     
-    // Then create the ad with the creative
-    const adParams: Record<string, any> = {
+    // Then create the ad with the creative - convert camelCase to snake_case using humps
+    const adParams = humps.decamelizeKeys({
       name: config.name,
-      adset_id: config.adsetId,
+      adsetId: config.adsetId,
       status: config.status,
-      creative: { creative_id: creativeResponse.id }
-    };
-    
-    // Add tracking specs if available
-    if (config.trackingSpecs) {
-      adParams.tracking_specs = config.trackingSpecs;
-    }
-    
-    // Add bid amount if specified
-    if (config.bidAmount) {
-      adParams.bid_amount = config.bidAmount;
-    }
+      creative: { creativeId: creativeResponse.id },
+      trackingSpecs: config.trackingSpecs,
+      bidAmount: config.bidAmount,
+      conversionDomain: config.conversionDomain,
+      adlabels: config.adlabels,
+      display_sequence: config.display_sequence,
+      engagement_audience: config.engagement_audience
+    });
     
     const adResponse = await apiRequest<{id: string}>(
       baseUrl,
@@ -278,11 +260,11 @@ export async function getAd(
 }
 
 /**
- * Updates an existing ad
+ * Updates an existing ad with new configuration
  * @param baseUrl Base URL for the API
  * @param accessToken Facebook access token
  * @param adId Ad ID to update
- * @param config Ad configuration with updated fields
+ * @param config New ad configuration
  * @returns Promise with update response
  */
 export async function updateAd(
@@ -292,73 +274,61 @@ export async function updateAd(
   config: Partial<AdConfig>
 ): Promise<AdResponse> {
   try {
-    const path = `${adId}`;
+    // Prepare the update parameters
+    const params: Record<string, any> = humps.decamelizeKeys({
+      name: config.name,
+      status: config.status,
+      bidAmount: config.bidAmount,
+      trackingSpecs: config.trackingSpecs,
+      conversionDomain: config.conversionDomain,
+      adlabels: config.adlabels,
+      display_sequence: config.display_sequence,
+      engagement_audience: config.engagement_audience
+    });
     
-    // Prepare update parameters based on official API documentation
-    const params: Record<string, any> = {};
-    
-    // Add name if provided
-    if (config.name) {
-      params.name = config.name;
-    }
-    
-    // Add status if provided
-    if (config.status) {
-      params.status = config.status;
-    }
-    
-    // Add creative if provided
+    // Handle creative separately since it needs a different update approach
     if (config.creative) {
-      if (typeof config.creative === 'object') {
-        if (config.creative.creative_id) {
-          // Handle creative by ID
-          params.creative = {
-            creative_id: config.creative.creative_id
-          };
-        } else {
-          // Handle full creative object
-          params.creative = config.creative;
-        }
-      } else {
-        params.creative = config.creative;
+      // Need to create a new creative
+      const creativeParams = humps.decamelizeKeys({
+        name: config.creative.name,
+        title: config.creative.title,
+        body: config.creative.body,
+        linkUrl: config.creative.linkUrl,
+        imageUrl: config.creative.imageUrl,
+        callToActionType: config.creative.callToAction,
+        urlTags: config.creative.urlTags,
+        objectStorySpec: config.creative.objectStorySpec,
+        format: config.creative.format
+      });
+      
+      // Update or create the ad creative
+      const ad: Ad = await getAd(baseUrl, accessToken, adId);
+      
+      // If the ad has a creative, use its ID
+      if (ad.creative && typeof ad.creative === 'object' && 'id' in ad.creative) {
+        params.creative = { creative_id: ad.creative.id };
       }
     }
     
-    // Add tracking specs if provided
-    if (config.trackingSpecs) {
-      params.tracking_specs = config.trackingSpecs;
-    }
-    
-    // Add ad labels if provided
-    if (config.adlabels) {
-      params.adlabels = config.adlabels;
-    }
-    
-    // Add conversion domain if provided
-    if (config.conversionDomain) {
-      params.conversion_domain = config.conversionDomain;
-    }
-    
-    // Add display sequence if provided
-    if (config.display_sequence) {
-      params.display_sequence = config.display_sequence;
-    }
-    
-    // Add engagement audience flag if provided
-    if (config.engagement_audience !== undefined) {
-      params.engagement_audience = config.engagement_audience;
-    }
-    
-    const response = await apiRequest<AdResponse>(
+    // Make the update request
+    const response = await apiRequest<{success: boolean}>(
       baseUrl,
-      path,
+      adId,
       accessToken,
       'POST',
       params
     );
-    return response;
+    
+    // Fetch the updated ad
+    const updatedAd = await getAd(baseUrl, accessToken, adId);
+    
+    return {
+      id: adId,
+      success: response.success || true,
+      data: updatedAd
+    };
   } catch (error) {
-    handleApiError(error, `updateAd(${adId})`);
+    handleApiError(error, `update ad ${adId}`);
     throw error;
   }
 } 

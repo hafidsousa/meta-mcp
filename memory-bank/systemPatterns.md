@@ -7,6 +7,7 @@ The system follows a modular architecture with clear separation of concerns:
 3. **Configuration Management**: Handles environment and credentials
 4. **Operation Handlers**: Processes specific advertising operations
 5. **Response Formatters**: Formats API responses for Cursor IDE
+6. **Case Conversion Layer**: Manages camelCase to snake_case conversion for API compatibility
 
 ## Key Technical Decisions
 1. **TypeScript Implementation**: Ensures type safety and better development experience
@@ -16,6 +17,7 @@ The system follows a modular architecture with clear separation of concerns:
 5. **API Versioning**: Support for Facebook Graph API v22.0
 6. **Direct API Integration**: Using native fetch for Facebook Graph API calls without SDK dependencies
 7. **File Size Constraints**: Module files kept under 300 lines for maintainability
+8. **Case Conversion Pattern**: Using humps library for reliable camelCase to snake_case conversion
 
 ## Design Patterns
 1. **Command Pattern**: For handling different advertising operations
@@ -24,6 +26,7 @@ The system follows a modular architecture with clear separation of concerns:
 4. **Adapter Pattern**: For API response formatting
 5. **Strategy Pattern**: For different operation implementations
 6. **Facade Pattern**: Client class provides a simplified interface to the subsystems
+7. **Transformer Pattern**: For converting between camelCase and snake_case in API interactions
 
 ## Code Organization
 1. **src/utils/api.ts**: API request utilities and error handling
@@ -48,6 +51,7 @@ graph TD
     D --> G[Ad Operations]
     D --> H[Account Operations]
     E & F & G & H --> I[API Utilities]
+    E & F & G & H --> CC[Case Conversion]
     I --> J[Facebook Marketing API]
     K[Configuration] --> D
     K --> E & F & G & H
@@ -58,9 +62,17 @@ graph TD
 1. Cursor IDE sends MCP command
 2. MCP Interface receives and validates command
 3. Client delegates to appropriate Operation Handler
-4. API Utilities make API call to Facebook
-5. Response processed and returned to Client
-6. Formatted response returned to Cursor IDE
+4. Case conversion transforms parameters from camelCase to snake_case
+5. API Utilities make API call to Facebook
+6. Response processed and returned to Client
+7. Formatted response returned to Cursor IDE
+
+## Case Conversion Pattern
+1. **Consistent Interface**: Client accepts camelCase parameters (industry standard in JS/TS)
+2. **Transformation Layer**: humps.decamelizeKeys() converts to snake_case for API
+3. **Nested Object Handling**: Recursively transforms nested objects and arrays
+4. **Documentation**: Clear documentation on expected format in file headers
+5. **Type Safety**: Maintains TypeScript type safety through the conversion process
 
 ## Security Patterns
 1. Environment-based credential management

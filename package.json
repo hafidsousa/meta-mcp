@@ -37,10 +37,12 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.9.0",
+    "@types/humps": "^2.0.6",
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
     "dayjs": "^1.11.13",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "humps": "^2.0.1"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

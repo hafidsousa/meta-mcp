@@ -1,9 +1,15 @@
 /**
  * @fileoverview Ad Set operations for Facebook Marketing API
+ * 
+ * @note IMPORTANT: All fields in request payloads must be in camelCase format.
+ * This is especially important for targeting parameters (use 'geoLocations' not 'geo_locations',
+ * 'ageMin' not 'age_min', etc). The API client expects camelCase and will not properly
+ * process snake_case fields.
  */
 
 import { AdSet, AdSetConfig, AdSetResponse } from '../types';
 import { apiRequest, handleApiError } from '../utils/api';
+import * as humps from 'humps';
 
 // Define the AdSetConfigType interface to be compatible with Partial<AdSetConfig>
 interface AdSetConfigType {
@@ -25,29 +31,6 @@ interface AdSetConfigType {
   promotedObject?: Record<string, any>;
   destinationType?: string;
   adSchedules?: Record<string, any>[];
-}
-
-/**
- * Converts object keys from camelCase to snake_case
- * @param obj Object to convert
- * @returns New object with converted keys
- */
-function convertKeysToSnakeCase(obj: Record<string, any>): Record<string, any> {
-  const result: Record<string, any> = {};
-  
-  Object.entries(obj).forEach(([key, value]) => {
-    // Convert camelCase to snake_case
-    const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-    
-    // Handle nested objects
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
-      result[snakeKey] = convertKeysToSnakeCase(value);
-    } else {
-      result[snakeKey] = value;
-    }
-  });
-  
-  return result;
 }
 
 /**
@@ -150,9 +133,9 @@ export async function createAdSet(
       params.use_average_cost = useAverageCost;
     }
     
-    // Add promoted object
+    // Add promoted object - convert to snake_case using humps
     if (promotedObject) {
-      params.promoted_object = convertKeysToSnakeCase(promotedObject);
+      params.promoted_object = humps.decamelizeKeys(promotedObject);
     }
     
     // Add destination type
@@ -165,50 +148,10 @@ export async function createAdSet(
       params.ad_schedules = adSchedules;
     }
 
-    // Handle targeting separately to fix serialization issues
+    // Handle targeting - convert to snake_case using humps for the Facebook API
     if (targeting) {
-      // Convert from camelCase to snake_case naming convention
-      const targetingObj: Record<string, any> = {};
-      
-      // Handle geoLocations special case
-      if (targeting.geoLocations) {
-        targetingObj.geo_locations = {};
-        
-        if (targeting.geoLocations.countries) {
-          targetingObj.geo_locations.countries = targeting.geoLocations.countries;
-        }
-        
-        if (targeting.geoLocations.regions) {
-          targetingObj.geo_locations.regions = targeting.geoLocations.regions;
-        }
-        
-        if (targeting.geoLocations.cities) {
-          targetingObj.geo_locations.cities = targeting.geoLocations.cities;
-        }
-        
-        if (targeting.geoLocations.zips) {
-          targetingObj.geo_locations.zips = targeting.geoLocations.zips;
-        }
-      }
-      
-      // Handle other targeting parameters
-      if (targeting.ageMin !== undefined) targetingObj.age_min = targeting.ageMin;
-      if (targeting.ageMax !== undefined) targetingObj.age_max = targeting.ageMax;
-      if (targeting.genders) targetingObj.genders = targeting.genders;
-      if (targeting.interests) targetingObj.interests = targeting.interests;
-      if (targeting.behaviors) targetingObj.behaviors = targeting.behaviors;
-      if (targeting.locales) targetingObj.locales = targeting.locales;
-      if (targeting.publisherPlatforms) targetingObj.publisher_platforms = targeting.publisherPlatforms;
-      if (targeting.facebookPositions) targetingObj.facebook_positions = targeting.facebookPositions;
-      if (targeting.instagramPositions) targetingObj.instagram_positions = targeting.instagramPositions;
-      if (targeting.devicePlatforms) targetingObj.device_platforms = targeting.devicePlatforms;
-      if (targeting.userOs) targetingObj.user_os = targeting.userOs;
-      if (targeting.userDevice) targetingObj.user_device = targeting.userDevice;
-      if (targeting.flexibleSpec) targetingObj.flexible_spec = targeting.flexibleSpec;
-      if (targeting.exclusions) targetingObj.exclusions = targeting.exclusions;
-      if (targeting.customAudiences) targetingObj.custom_audiences = targeting.customAudiences;
-      if (targeting.excludedInterests) targetingObj.excluded_interests = targeting.excludedInterests;
-      if (targeting.excludedDemographics) targetingObj.excluded_demographics = targeting.excludedDemographics;
+      // Convert all keys from camelCase to snake_case properly handling nested objects
+      const targetingObj = humps.decamelizeKeys(targeting);
       
       // Properly stringify the targeting object
       params.targeting = JSON.stringify(targetingObj);
@@ -443,9 +386,10 @@ export async function updateAdSet(
       params.bid_strategy = config.bidStrategy;
     }
     
-    // Add targeting if provided
+    // Add targeting if provided - convert to snake_case using humps
     if (config.targeting) {
-      params.targeting = config.targeting;
+      const targetingObj = humps.decamelizeKeys(config.targeting);
+      params.targeting = JSON.stringify(targetingObj);
     }
     
     // Add optimization goal if provided
@@ -458,15 +402,9 @@ export async function updateAdSet(
       params.billing_event = config.billingEvent;
     }
     
-    // Add promoted object if specified
+    // Add promoted object if specified - convert to snake_case using humps
     if (config.promotedObject) {
-      // Convert camelCase keys to snake_case
-      const promotedObject: Record<string, any> = {};
-      Object.entries(config.promotedObject).forEach(([key, value]) => {
-        const snakeCaseKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-        promotedObject[snakeCaseKey] = value;
-      });
-      params.promoted_object = promotedObject;
+      params.promoted_object = humps.decamelizeKeys(config.promotedObject);
     }
     
     // Add destination type if provided

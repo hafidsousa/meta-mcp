@@ -1,10 +1,14 @@
 /**
  * @fileoverview Campaign operations for Facebook Marketing API
+ * 
+ * @note IMPORTANT: All fields in request payloads must be in camelCase format.
+ * The API client will convert them to snake_case as needed for the Facebook API.
  */
 
 import { Campaign, CampaignConfig, CampaignResponse, CampaignStatus } from '../types';
 import { apiRequest, handleApiError } from '../utils/api';
 import { FacebookMarketingError, ErrorCodes } from '../errors';
+import * as humps from 'humps';
 
 /**
  * Creates a new campaign with specified configuration
@@ -36,109 +40,25 @@ export async function createCampaign(
       );
     }
 
-    // Convert camelCase to snake_case for API params
-    const params: Record<string, any> = {
+    // Convert camelCase to snake_case for API params using humps
+    const params = humps.decamelizeKeys({
       name: config.name,
       objective: config.objective,
       status: config.status,
-      special_ad_categories: config.specialAdCategories || []
-    };
-    
-    // Add spend cap if specified (in cents)
-    if (config.spendCap) {
-      params.spend_cap = config.spendCap;
-    }
-    
-    // Add bid strategy if specified
-    if (config.bidStrategy) {
-      params.bid_strategy = config.bidStrategy;
-    }
-    
-    // Add budgets if specified
-    if (config.dailyBudget) {
-      params.daily_budget = config.dailyBudget;
-    }
-    
-    if (config.lifetimeBudget) {
-      params.lifetime_budget = config.lifetimeBudget;
-    }
-    
-    // Add campaign budget optimization if specified
-    if (config.campaignBudgetOptimization !== undefined) {
-      params.campaign_budget_optimization = config.campaignBudgetOptimization;
-    }
-    
-    // Add ROAS target if specified
-    if (config.minRoasTargetValue) {
-      params.min_roas_target_value = config.minRoasTargetValue;
-    }
-    
-    // Add ad labels if specified
-    if (config.adLabels?.length) {
-      params.adlabels = config.adLabels;
-    }
-    
-    // Add time parameters if specified
-    if (config.startTime) {
-      params.start_time = config.startTime;
-    }
-    
-    if (config.stopTime) {
-      params.stop_time = config.stopTime;
-    }
-    
-    // Add boosted object if specified
-    if (config.boostedObjectId) {
-      params.boosted_object_id = config.boostedObjectId;
-    }
-    
-    // Add promoted object if specified
-    if (config.promotedObject) {
-      const promotedObject: Record<string, any> = {};
-      
-      if (config.promotedObject.pageId) {
-        promotedObject.page_id = config.promotedObject.pageId;
-      }
-      
-      if (config.promotedObject.applicationId) {
-        promotedObject.application_id = config.promotedObject.applicationId;
-      }
-      
-      if (config.promotedObject.objectStoreUrl) {
-        promotedObject.object_store_url = config.promotedObject.objectStoreUrl;
-      }
-      
-      if (config.promotedObject.customEventType) {
-        promotedObject.custom_event_type = config.promotedObject.customEventType;
-      }
-      
-      if (config.promotedObject.offerId) {
-        promotedObject.offer_id = config.promotedObject.offerId;
-      }
-      
-      if (config.promotedObject.pixelId) {
-        promotedObject.pixel_id = config.promotedObject.pixelId;
-      }
-      
-      if (config.promotedObject.productSetId) {
-        promotedObject.product_set_id = config.promotedObject.productSetId;
-      }
-      
-      if (config.promotedObject.productCatalogId) {
-        promotedObject.product_catalog_id = config.promotedObject.productCatalogId;
-      }
-      
-      if (config.promotedObject.placePageSetId) {
-        promotedObject.place_page_set_id = config.promotedObject.placePageSetId;
-      }
-      
-      params.promoted_object = promotedObject;
-    }
-    
-    // Add SKAdNetwork attribution if specified
-    if (config.isSkadnetworkAttribution !== undefined) {
-      params.is_skadnetwork_attribution = config.isSkadnetworkAttribution;
-    }
+      specialAdCategories: config.specialAdCategories || [],
+      spendCap: config.spendCap,
+      bidStrategy: config.bidStrategy,
+      dailyBudget: config.dailyBudget,
+      lifetimeBudget: config.lifetimeBudget,
+      campaignBudgetOptimization: config.campaignBudgetOptimization,
+      minRoasTargetValue: config.minRoasTargetValue,
+      adLabels: config.adLabels,
+      startTime: config.startTime,
+      stopTime: config.stopTime,
+      boostedObjectId: config.boostedObjectId,
+      promotedObject: config.promotedObject,
+      isSkadnetworkAttribution: config.isSkadnetworkAttribution
+    });
     
     const response = await apiRequest<{id: string}>(
       baseUrl,
@@ -287,7 +207,7 @@ export async function getCampaigns(
 }
 
 /**
- * Updates an existing campaign with new configuration
+ * Updates an existing campaign with new configuration settings
  * @param baseUrl Base URL for the API
  * @param accessToken Facebook access token
  * @param campaignId The ID of the campaign to update
@@ -301,121 +221,29 @@ export async function updateCampaign(
   config: Partial<CampaignConfig>
 ): Promise<CampaignResponse> {
   try {
-    // Convert camelCase to snake_case for API params
-    const params: Record<string, any> = {};
+    // Convert camelCase to snake_case for API params using humps
+    const params = humps.decamelizeKeys({
+      name: config.name,
+      status: config.status,
+      objective: config.objective,
+      specialAdCategories: config.specialAdCategories,
+      spendCap: config.spendCap,
+      bidStrategy: config.bidStrategy,
+      dailyBudget: config.dailyBudget,
+      lifetimeBudget: config.lifetimeBudget,
+      campaignBudgetOptimization: config.campaignBudgetOptimization,
+      minRoasTargetValue: config.minRoasTargetValue,
+      adLabels: config.adLabels,
+      startTime: config.startTime,
+      stopTime: config.stopTime,
+      boostedObjectId: config.boostedObjectId,
+      promotedObject: config.promotedObject,
+      isSkadnetworkAttribution: config.isSkadnetworkAttribution,
+      useDefaultBuyingType: config.useDefaultBuyingType
+    });
     
-    // Only include specified fields in the update
-    if (config.name) {
-      params.name = config.name;
-    }
-    
-    if (config.status) {
-      params.status = config.status;
-    }
-    
-    if (config.objective) {
-      params.objective = config.objective;
-    }
-    
-    if (config.specialAdCategories) {
-      params.special_ad_categories = config.specialAdCategories;
-    }
-    
-    if (config.spendCap !== undefined) {
-      params.spend_cap = config.spendCap;
-    }
-    
-    if (config.bidStrategy) {
-      params.bid_strategy = config.bidStrategy;
-    }
-    
-    if (config.dailyBudget !== undefined) {
-      params.daily_budget = config.dailyBudget;
-    }
-    
-    if (config.lifetimeBudget !== undefined) {
-      params.lifetime_budget = config.lifetimeBudget;
-    }
-    
-    if (config.campaignBudgetOptimization !== undefined) {
-      params.campaign_budget_optimization = config.campaignBudgetOptimization;
-    }
-    
-    if (config.minRoasTargetValue !== undefined) {
-      params.min_roas_target_value = config.minRoasTargetValue;
-    }
-    
-    if (config.adLabels) {
-      params.adlabels = config.adLabels;
-    }
-    
-    if (config.startTime) {
-      params.start_time = config.startTime;
-    }
-    
-    if (config.stopTime) {
-      params.stop_time = config.stopTime;
-    }
-    
-    if (config.boostedObjectId) {
-      params.boosted_object_id = config.boostedObjectId;
-    }
-    
-    if (config.promotedObject) {
-      const promotedObject: Record<string, any> = {};
-      
-      if (config.promotedObject.pageId) {
-        promotedObject.page_id = config.promotedObject.pageId;
-      }
-      
-      if (config.promotedObject.applicationId) {
-        promotedObject.application_id = config.promotedObject.applicationId;
-      }
-      
-      if (config.promotedObject.objectStoreUrl) {
-        promotedObject.object_store_url = config.promotedObject.objectStoreUrl;
-      }
-      
-      if (config.promotedObject.customEventType) {
-        promotedObject.custom_event_type = config.promotedObject.customEventType;
-      }
-      
-      if (config.promotedObject.offerId) {
-        promotedObject.offer_id = config.promotedObject.offerId;
-      }
-      
-      if (config.promotedObject.pixelId) {
-        promotedObject.pixel_id = config.promotedObject.pixelId;
-      }
-      
-      if (config.promotedObject.productSetId) {
-        promotedObject.product_set_id = config.promotedObject.productSetId;
-      }
-      
-      if (config.promotedObject.productCatalogId) {
-        promotedObject.product_catalog_id = config.promotedObject.productCatalogId;
-      }
-      
-      if (config.promotedObject.placePageSetId) {
-        promotedObject.place_page_set_id = config.promotedObject.placePageSetId;
-      }
-      
-      params.promoted_object = promotedObject;
-    }
-    
-    if (config.isSkadnetworkAttribution !== undefined) {
-      params.is_skadnetwork_attribution = config.isSkadnetworkAttribution;
-    }
-    
-    // Only proceed if there are parameters to update
-    if (Object.keys(params).length === 0) {
-      throw new FacebookMarketingError(
-        'No valid fields provided for campaign update',
-        ErrorCodes.VALIDATION_ERROR
-      );
-    }
-    
-    await apiRequest<{success: boolean}>(
+    // Make API request to update campaign
+    const response = await apiRequest<{ success: boolean }>(
       baseUrl,
       campaignId,
       accessToken,
@@ -423,15 +251,16 @@ export async function updateCampaign(
       params
     );
     
-    // Get the updated campaign
+    // Get the updated campaign data
     const campaign = await getCampaign(baseUrl, accessToken, campaignId);
     
     return {
-      success: true,
+      success: response.success || true,
       id: campaignId,
       data: campaign
     };
   } catch (error) {
     handleApiError(error, `update campaign ${campaignId}`);
+    throw error;
   }
 } 
