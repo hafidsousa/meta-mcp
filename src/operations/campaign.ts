@@ -41,8 +41,8 @@ export async function createCampaign(
       { 
         fields: 'id,name,objective,status,created_time,start_time,stop_time,spend_cap,special_ad_categories,' +
                'special_ad_category_country,daily_budget,lifetime_budget,bid_strategy,boosted_object_id,buying_type,promoted_object,' +
-               'budget_remaining,effective_status,account_id,adlabels,is_skadnetwork_attribution,is_using_l3_schedule,' +
-               'campaign_optimization_type,source_campaign_id,iterative_split_test_configs,budget_schedule_specs,topline_id'
+               'budget_remaining,effective_status,account_id,adlabels,is_skadnetwork_attribution,' +
+               'source_campaign_id,topline_id'
       }
     );
 

@@ -41,57 +41,66 @@ const campaignConfig: CampaignConfig = {
   
   // Special ad categories for regulated industries (required by Facebook for certain industries)
   // Leave empty array for regular campaigns with no special ad categories
-  // specialAdCategories: [], // Options from enum: EMPLOYMENT, HOUSING, CREDIT, ISSUES_ELECTIONS_POLITICS, NONE
+  special_ad_categories: [], // Options from enum: EMPLOYMENT, HOUSING, CREDIT, ISSUES_ELECTIONS_POLITICS, NONE
   
   // Budget settings (must use either dailyBudget or lifetimeBudget, not both)
-  dailyBudget: 5000, // $50.00 (in cents)
-  // lifetimeBudget: 100000, // $1,000.00 (in cents) - Don't use with dailyBudget
+  daily_budget: 5000, // $50.00 (in cents)
+  // lifetime_budget: 100000, // $1,000.00 (in cents) - Don't use with dailyBudget
   
   // Scheduling settings
-  startTime: new Date(Date.now() + 86400000).toISOString(), // Start tomorrow
-  // stopTime: new Date(Date.now() + 30 * 86400000).toISOString(), // Required if using lifetimeBudget
+  start_time: new Date(Date.now() + 86400000).toISOString(), // Start tomorrow
+  // stop_time: new Date(Date.now() + 30 * 86400000).toISOString(), // Required if using lifetimeBudget
   
   // Bidding settings
-  bidStrategy: BidStrategy.LOWEST_COST_WITHOUT_CAP, // Options from enum: LOWEST_COST_WITHOUT_CAP, LOWEST_COST_WITH_BID_CAP, COST_CAP, LOWEST_COST_WITH_MIN_ROAS
+  bid_strategy: BidStrategy.LOWEST_COST_WITHOUT_CAP, // Options from enum: LOWEST_COST_WITHOUT_CAP, LOWEST_COST_WITH_BID_CAP, COST_CAP, LOWEST_COST_WITH_MIN_ROAS
   
   // Campaign budget optimization - automatically distributes budget across ad sets
-  campaignBudgetOptimization: true,
+  campaign_budget_optimization: true,
   
   // Optional settings
-  // spendCap: 200000, // Campaign spend cap in cents ($2,000.00)
-  // minRoasTargetValue: 3.0, // Minimum ROAS target value - Only use with bidStrategy LOWEST_COST_WITH_MIN_ROAS
+  // spend_cap: 200000, // Campaign spend cap in cents ($2,000.00)
+  // min_roas_target_value: 3.0, // Minimum ROAS target value - Only use with bidStrategy LOWEST_COST_WITH_MIN_ROAS
   
   // Ad Labels for organization
-  // adLabels: [{ name: 'Q4_2023' }, { name: 'ProductLaunch' }],
+  // ad_labels: [{ name: 'Q4_2023' }, { name: 'ProductLaunch' }],
   
   // Boosted object (for boost-type campaigns)
-  // boostedObjectId: '123456789', // ID of the post, page, etc. being boosted
+  // boosted_object_id: '123456789', // ID of the post, page, etc. being boosted
   
   // Source campaign
   // source_campaign_id: '123456789', // Original campaign ID if this is a duplicate
   
   // Promoted object (additional specifications for certain campaign objectives)
-  // promotedObject: {
-  //   pageId: '123456789', // Page ID for the campaign
-  //   pixelId: '987654321', // Pixel ID for conversion tracking
-  //   // Other fields available: applicationId, objectStoreUrl, customEventType, 
-  //   // offerId, productSetId, productCatalogId, placePageSetId
+  // promoted_object: {
+  //   page_id: '123456789', // Page ID for the campaign
+  //   pixel_id: '987654321', // Pixel ID for conversion tracking
+  //   // Other fields available: application_id, object_store_url, custom_event_type, 
+  //   // offer_id, product_set_id, product_catalog_id, place_page_set_id
   // },
   
   // Advanced settings
-  // useDefaultBuyingType: true, // Whether to use default buying type
-  // isSkadnetworkAttribution: false, // For iOS app campaigns
+  // use_default_buying_type: true, // Whether to use default buying type
+  // is_skadnetwork_attribution: false, // For iOS app campaigns
 };
 
 /**
  * Creates a Facebook campaign using the specified configuration
  */
 async function createCampaign(): Promise<void> {
+  // Set a timeout to prevent hanging
+  const timeout = setTimeout(() => {
+    console.error('❌ Request timed out after 30 seconds');
+    process.exit(1);
+  }, 30000);
+
   try {
     console.log('Creating campaign with config:', JSON.stringify(campaignConfig, null, 2));
     
     // Make the API request to create the campaign
     const response: CampaignResponse = await client.createCampaign(campaignConfig);
+    
+    // Clear the timeout since the request completed
+    clearTimeout(timeout);
     
     // Handle the response
     if (response && response.id) {
@@ -106,8 +115,12 @@ async function createCampaign(): Promise<void> {
     } else {
       console.error('❌ Campaign creation failed - no ID returned');
       console.error('Response:', JSON.stringify(response, null, 2));
+      process.exit(1);
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    // Clear the timeout since we've got a response (even if it's an error)
+    clearTimeout(timeout);
+    
     console.error('❌ Error creating campaign:');
     if (error instanceof Error) {
       console.error('Error message:', error.message);
@@ -115,13 +128,15 @@ async function createCampaign(): Promise<void> {
     } else {
       console.error('Unknown error:', error);
     }
+    process.exit(1);
   }
 }
 
 // Execute the function
 createCampaign().then(() => {
   console.log('Script execution completed');
-}).catch(error => {
+  process.exit(0);
+}).catch((error: unknown) => {
   console.error('Fatal error in script execution:', error);
   process.exit(1);
 }); 
