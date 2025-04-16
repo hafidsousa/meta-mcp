@@ -9,7 +9,7 @@
  *   FB_AD_ACCOUNT_ID - Facebook Ad Account ID
  * 
  * This script creates a campaign with comprehensive settings.
- * Customize the campaignConfig object below to adjust objective, budget, etc.
+ * Customise the campaignConfig object below to adjust objective, budget, etc.
  * 
  * @see https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group
  */
