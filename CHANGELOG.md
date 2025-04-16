@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/hafidsousa/meta-mcp/compare/v1.8.0...v1.9.0) (2025-04-16)
+
+
+### Features
+
+* Enhance getCampaigns functionality and documentation ([acb8531](https://github.com/hafidsousa/meta-mcp/commit/acb853189bc0afd630b75acd2413ab20ec3daeea))
+
 # [1.8.0](https://github.com/hafidsousa/meta-mcp/compare/v1.7.0...v1.8.0) (2025-04-16)
 
 
