@@ -1,45 +1,40 @@
 /**
- * Command-line tool to list available Facebook Ad Campaigns
- * Usage: npm run list-campaigns
+ * Script to list Facebook campaigns
+ * 
+ * Usage:
+ *   npx ts-node src/scripts/list-campaigns.ts
+ * 
+ * Environment variables:
+ *   FB_ACCESS_TOKEN - Facebook API access token
+ *   FB_AD_ACCOUNT_ID - Facebook Ad Account ID
+ * 
+ * This script retrieves and lists all campaigns in the ad account.
  */
 
-import { config as loadEnv } from 'dotenv';
+import { fbConfig } from '../config';
 import { FacebookMarketingClient } from '../client';
+import { config as loadEnv } from 'dotenv';
 
 // Load environment variables
 loadEnv();
 
-const accessToken = process.env.FB_ACCESS_TOKEN;
-const adAccountId = process.env.FB_AD_ACCOUNT_ID;
+// Extract credentials from environment or config
+const accessToken = process.env.FB_ACCESS_TOKEN || fbConfig.accessToken;
+const adAccountId = process.env.FB_AD_ACCOUNT_ID || fbConfig.adAccountId;
 
-if (!accessToken) {
-  console.error('Error: FB_ACCESS_TOKEN is required. Please set it in your .env file.');
-  process.exit(1);
-}
-
-if (!adAccountId) {
-  console.error('Error: FB_AD_ACCOUNT_ID is required. Please set it in your .env file.');
-  console.error('You can get your ad account ID by running: npm run list-accounts');
-  process.exit(1);
-}
-
-// Initialize client
+// Create a client instance
 const client = new FacebookMarketingClient({
   accessToken,
-  adAccountId,
-  appId: process.env.FB_APP_ID || '',
-  appSecret: process.env.FB_APP_SECRET || '',
+  adAccountId
 });
 
-// For debugging
-console.log(`Access token length: ${accessToken.length}`);
+console.log('Listing campaigns from Facebook Marketing API');
 console.log(`Access token starts with: ${accessToken.substring(0, 10)}...`);
 console.log(`Using ad account ID: ${adAccountId}`);
 
 const listCampaigns = async () => {
-  console.log('Fetching campaigns...');
-  
   try {
+    // Get all campaigns for the ad account
     const campaigns = await client.getCampaigns();
     
     if (!campaigns || campaigns.length === 0) {
@@ -51,7 +46,7 @@ const listCampaigns = async () => {
     
     // Display available campaigns
     campaigns.forEach((campaign: any, index: number) => {
-      console.log(`${index + 1}. ID: ${campaign.id.replace('act_', '')}`);
+      console.log(`${index + 1}. ID: ${campaign.id}`);
       console.log(`   Name: ${campaign.name}`);
       console.log(`   Status: ${campaign.status}`);
       console.log(`   Objective: ${campaign.objective}`);
@@ -68,11 +63,8 @@ const listCampaigns = async () => {
     });
   } catch (error) {
     console.error('Unexpected error during API call:', error);
-    process.exit(1);
   }
 };
 
-listCampaigns().catch(error => {
-  console.error('Unexpected error:', error);
-  process.exit(1);
-}); 
+// Execute the list function
+listCampaigns(); 

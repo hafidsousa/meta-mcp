@@ -25,9 +25,8 @@
     "generate-token-url": "ts-node src/scripts/generate-token-url.ts",
     "create-campaign": "ts-node src/scripts/create-campaign.ts",
     "create-adset": "ts-node src/scripts/create-adset.ts",
-    "generate-docs": "ts-node src/scripts/generate-docs.ts",
-    "generate-markdown-docs": "ts-node src/scripts/generate-markdown-docs.ts",
-    "docs": "npm run generate-docs -- --file && npm run generate-markdown-docs"
+    "list-campaign-schema": "ts-node src/scripts/tools/list-campaign-schemas.ts",
+    "list-all-tools": "ts-node src/scripts/tools/list-all-tools.ts"
   },
   "keywords": [
     "facebook",
@@ -41,6 +40,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.9.0",
     "@types/humps": "^2.0.6",
+    "axios": "^1.8.4",
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
     "dayjs": "^1.11.13",
@@ -55,6 +55,7 @@
     "@semantic-release/github": "^11.0.1",
     "@semantic-release/npm": "^12.0.1",
     "@semantic-release/release-notes-generator": "^10.0.3",
+    "@types/express": "^5.0.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",

@@ -7,16 +7,19 @@
  * Environment variables:
  *   FB_ACCESS_TOKEN - Facebook API access token
  *   FB_AD_ACCOUNT_ID - Facebook Ad Account ID
- *   FB_ADSET_ID - Optional ad set ID to override the default
+ *   FB_ADSET_ID - Ad Set ID for the ad (required)
  *   FB_PAGE_ID - Facebook Page ID
  * 
- * This script creates an ad with comprehensive settings.
- * Customize the adConfig object below to adjust creative, text, and other ad properties.
+ * This script creates an ad with text and image.
+ * 
+ * Facebook Ads API docs:
+ * https://developers.facebook.com/docs/marketing-api/reference/adgroup
  */
 
 import { fbConfig } from '../config';
 import { FacebookMarketingClient } from '../client';
-import { AdConfig, AdResponse } from '../types';
+// Import types from the main index file where we've declared them as any
+import { AdConfig, AdResponse } from '..';
 
 // Create a client instance
 const client = new FacebookMarketingClient(fbConfig);

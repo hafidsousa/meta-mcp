@@ -15,7 +15,8 @@
 
 import { fbConfig } from '../config';
 import { FacebookMarketingClient } from '../client';
-import { AdSetConfig, AdSetResponse } from '../types';
+// Import types from the main index file where we've declared them as any
+import { AdSetConfig, AdSetResponse } from '..';
 
 // Create a client instance
 const client = new FacebookMarketingClient(fbConfig);

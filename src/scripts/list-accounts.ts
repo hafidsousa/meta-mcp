@@ -5,7 +5,17 @@
 
 import { config as loadEnv } from 'dotenv';
 import { fetchAdAccounts, extractAdAccountId } from '../mcp-utils';
-import { FacebookAdAccount } from '../types';
+
+// Define a simple type for account data
+type FacebookAdAccount = {
+  id: string;
+  name: string;
+  account_id: string;
+  account_status: number;
+  amount_spent: string;
+  currency: string;
+  [key: string]: any;
+};
 
 // Load environment variables
 loadEnv();

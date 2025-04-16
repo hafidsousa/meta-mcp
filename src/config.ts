@@ -3,10 +3,11 @@
  * 
  * @note For AI Assistants:
  * - All monetary values in cents (2000 = $20.00)
+ * - This is a pure pass-through proxy, all types are loose for flexibility.
  */
 
-import { CampaignConfig, AdSetConfig, AdCreativeConfig, FacebookConfig, CampaignObjective, CampaignStatus } from './types';
 import { config as loadEnv } from 'dotenv';
+import { FacebookConfig } from './index';
 
 // Load environment variables
 loadEnv();
@@ -31,39 +32,42 @@ export const fbConfig: FacebookConfig = {
 export const SERVER_NAME = "meta-mcp";
 export const SERVER_VERSION = "1.1.0";
 
-export const DEFAULT_CAMPAIGN_CONFIG: Partial<CampaignConfig> = {
-  objective: CampaignObjective.CONVERSIONS,
-  status: CampaignStatus.PAUSED,
-  specialAdCategories: [], // No special restrictions by default
-  spendCap: 0, // No default spend cap
-  campaignBudgetOptimization: true
+// Default Campaign Configuration (using any for pure pass-through)
+export const DEFAULT_CAMPAIGN_CONFIG: any = {
+  objective: "CONVERSIONS",
+  status: "PAUSED",
+  special_ad_categories: [], // No special restrictions by default
+  spend_cap: 0, // No default spend cap
+  campaign_budget_optimization: true
 };
 
-export const DEFAULT_ADSET_CONFIG: Partial<AdSetConfig> = {
-  dailyBudget: 5000, // $50.00 default daily budget
-  status: 'PAUSED', // Default to paused for safety
-  bidStrategy: 'LOWEST_COST_WITHOUT_CAP', // Default bid strategy
+// Default Ad Set Configuration (using any for pure pass-through)
+export const DEFAULT_ADSET_CONFIG: any = {
+  daily_budget: 5000, // $50.00 default daily budget
+  status: "PAUSED", // Default to paused for safety
+  bid_strategy: "LOWEST_COST_WITHOUT_CAP", // Default bid strategy
   targeting: {
-    geoLocations: {
-      countries: ['US'], // Default to US market
+    geo_locations: {
+      countries: ["US"], // Default to US market
     },
-    ageMin: 18,
-    ageMax: 65,
+    age_min: 18,
+    age_max: 65,
     genders: [1, 2], // Target all genders by default
-    publisherPlatforms: ['facebook'], // Default to Facebook only
-    facebookPositions: ['feed'], // Default to feed placements
-    devicePlatforms: ['mobile', 'desktop'], // Target all devices
+    publisher_platforms: ["facebook"], // Default to Facebook only
+    facebook_positions: ["feed"], // Default to feed placements
+    device_platforms: ["mobile", "desktop"], // Target all devices
     interests: [] // No default interests
   },
-  optimizationGoal: 'CONVERSIONS',
-  billingEvent: 'IMPRESSIONS',
-  useAverageCost: false, // Don't use average cost bidding by default
-  pacingType: ['standard'] // Use standard pacing by default
+  optimization_goal: "CONVERSIONS",
+  billing_event: "IMPRESSIONS",
+  use_average_cost: false, // Don't use average cost bidding by default
+  pacing_type: ["standard"] // Use standard pacing by default
 };
 
-export const DEFAULT_CREATIVE_CONFIG: Partial<AdCreativeConfig> = {
-  callToAction: 'LEARN_MORE',
-  format: 'single_image' // Default to single image format
+// Default Ad Creative Configuration (using any for pure pass-through)
+export const DEFAULT_CREATIVE_CONFIG: any = {
+  call_to_action_type: "LEARN_MORE",
+  format: "single_image" // Default to single image format
 };
 
 export const CAMPAIGN_NAME_FORMAT = '[Objective]-[Target]-[Date]';
@@ -78,20 +82,20 @@ export const FB_API_VERSION = 'v22.0'; // Updated to latest version
  * @param provided User provided configuration
  * @returns Merged configuration
  */
-export function mergeConfig<T>(defaults: Partial<T>, provided: Partial<T>): T {
+export function mergeConfig(defaults: Record<string, any>, provided: Record<string, any>): any {
   return {
     ...defaults,
     ...provided,
     // Deep merge for nested objects like targeting
-    ...(provided && typeof provided === 'object' && Object.keys(provided).reduce((acc, key) => {
-      const defaultValue = (defaults as any)[key];
-      const providedValue = (provided as any)[key];
+    ...(provided && typeof provided === 'object' && Object.keys(provided).reduce((acc: Record<string, any>, key: string) => {
+      const defaultValue = defaults[key];
+      const providedValue = provided[key];
       
       if (defaultValue && typeof defaultValue === 'object' && providedValue && typeof providedValue === 'object') {
-        (acc as any)[key] = mergeConfig(defaultValue, providedValue);
+        acc[key] = mergeConfig(defaultValue, providedValue);
       }
       
       return acc;
     }, {}))
-  } as T;
+  };
 } 

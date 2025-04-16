@@ -13,6 +13,7 @@ The project follows a modular architecture with clearly separated concerns:
 - Operation handlers for specific Facebook Marketing API operations
 - Configuration management for credentials and environment
 - Response formatters for standardized API responses
+- Documentation generation system for automated tool definition documentation
 
 ### Code Organization
 - `/src`: Source code directory
@@ -23,6 +24,7 @@ The project follows a modular architecture with clearly separated concerns:
     - `/account.ts`: Account management operations
   - `/utils`: Utility functions
     - `/api.ts`: API request utilities and error handling
+    - `/docgen.ts`: Documentation generation utilities for tool definitions
   - `/config.ts`: Configuration management, environment loading, and logging utilities
   - `/tools`: MCP tool schema definitions organized by entity type
     - `/index.ts`: Tool exports and getAllTools function
@@ -34,12 +36,17 @@ The project follows a modular architecture with clearly separated concerns:
   - `/types.ts`: TypeScript type definitions
   - `/client.ts`: Main client facade
   - `/server.ts`: Slim main file for server setup and initialization
+  - `/scripts`: Script files for documentation generation and utilities
+    - `/generate-docs.ts`: JSON documentation generator
+    - `/generate-markdown-docs.ts`: Markdown documentation generator
 
 ### Design Patterns
 - **Facade Pattern**: Client class provides a simplified interface to subsystems
 - **Module Pattern**: Related functionality grouped in specific modules
 - **Command Pattern**: For handling different advertising operations
 - **Factory Pattern**: For creating API client instances
+- **Generator Pattern**: For creating documentation from TypeScript types
+- **Transformer Pattern**: For converting between camelCase and snake_case in API interactions
 
 ## Implementation Guidelines
 
@@ -49,6 +56,7 @@ The project follows a modular architecture with clearly separated concerns:
 - Centralized error handling in API utilities module
 - Domain-specific operations in their own modules
 - Client class should use facade pattern to delegate to operation modules
+- Documentation generation follows a two-stage process (JSON → Markdown)
 
 ### TypeScript Usage
 - Use strict typing for all functions and interfaces
@@ -56,6 +64,7 @@ The project follows a modular architecture with clearly separated concerns:
 - Document all public functions and interfaces
 - Use enums for static options like campaign objectives
 - Leverage generics for reusable components
+- Ensure proper type definitions to prevent build issues
 
 ### Error Handling
 - Use structured error responses
@@ -71,6 +80,7 @@ The project follows a modular architecture with clearly separated concerns:
 - Mock tests for Facebook API
 - End-to-end tests for MCP commands
 - Performance tests for critical paths
+- Test coverage for documentation generators
 
 ## Best Practices
 
@@ -80,6 +90,7 @@ The project follows a modular architecture with clearly separated concerns:
 - Validate input before API calls
 - Implement retry logic for transient errors
 - Cache responses when appropriate
+- Use proper case conversion for API parameters
 
 ### Code Maintainability
 - Follow module size constraint of 300 lines maximum
@@ -87,6 +98,7 @@ The project follows a modular architecture with clearly separated concerns:
 - Maintain clear separation of concerns
 - Implement proper documentation for all modules
 - Use facade pattern for simplifying client API
+- Generate documentation automatically to keep it in sync with code
 
 ### MCP Commands
 - Validate command parameters
@@ -94,6 +106,7 @@ The project follows a modular architecture with clearly separated concerns:
 - Handle timeouts appropriately
 - Implement progress reporting for long operations
 - Support cancellation for long-running processes
+- Document tools comprehensively with generated documentation
 
 ### Security Considerations
 - Store credentials in environment variables
@@ -107,14 +120,25 @@ The project follows a modular architecture with clearly separated concerns:
 ### Development Workflow
 - Implement core functionality first
 - Add comprehensive testing
-- Document all components
+- Document all components with automated generation
 - Review code for security and performance
 - Create usage examples
+- Update memory bank after significant changes
 
 ### Documentation Focus
-- Clear API documentation
+- Clear API documentation generated from TypeScript types
 - Comprehensive usage examples
 - Detailed configuration guide
 - Architecture and module organization
 - Troubleshooting information
-- Security best practices 
+- Security best practices
+- Regular memory bank updates
+
+### Documentation Generation Pattern
+- Use TypeScript types to generate tool definitions
+- Two-stage process: TypeScript → JSON → Markdown
+- Include example code snippets for each tool
+- Group tools by domain entity type
+- Keep documentation in sync with code changes
+- Combined command for full documentation generation
+- Detailed parameter documentation 

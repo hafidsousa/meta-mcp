@@ -1,9 +1,14 @@
+/**
+ * @fileoverview Simple error class for Facebook Marketing API
+ * 
+ * This is a pass-through error class that directly forwards Facebook API errors
+ * without complex mapping or transformation.
+ */
+
 export class FacebookMarketingError extends Error {
   constructor(
     message: string,
-    public code: string,
-    public originalError?: unknown,
-    public errorDetails?: Record<string, any> | null
+    public originalError?: any
   ) {
     super(message);
     this.name = 'FacebookMarketingError';
@@ -11,9 +16,6 @@ export class FacebookMarketingError extends Error {
 }
 
 export const ErrorCodes = {
-  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
   API_ERROR: 'API_ERROR',
-  RATE_LIMIT: 'RATE_LIMIT',
-  VALIDATION_ERROR: 'VALIDATION_ERROR',
   NETWORK_ERROR: 'NETWORK_ERROR'
 } as const; 

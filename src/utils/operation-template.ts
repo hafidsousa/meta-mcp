@@ -1,211 +1,194 @@
 /**
- * @fileoverview Operation template for Facebook Marketing API calls
- * Provides higher-order functions to reduce boilerplate in operation files
+ * @fileoverview Templates for common operation patterns with Facebook Marketing API
+ * 
+ * @note IMPORTANT: This is a pure pass-through proxy.
  */
 
-import * as humps from 'humps';
-import { apiRequest, handleApiError } from './api';
-import { z } from 'zod';
+import { apiRequest } from './api';
 
 /**
- * Generic create operation for Facebook entities
- * 
- * @param entityType Entity type name (e.g., 'campaign', 'adset', 'ad')
- * @param schema Zod schema for validation
- * @returns A function that creates the entity
+ * Creates a template for entity creation operations
+ * @param pathFn Function to generate the path for the API request
+ * @returns Function for creating entities
  */
-export function createOperation<T, U extends Record<string, unknown>, V>(
-  entityType: string,
-  schema: z.ZodType<T>
+export function createEntityTemplate(
+  pathFn: (baseUrl: string, adAccountId: string) => string,
+  fieldsForGet: string,
 ) {
+  /**
+   * Creates an entity
+   * @param baseUrl Base URL for the API
+   * @param adAccountId Ad account ID
+   * @param accessToken Facebook access token
+   * @param config Entity configuration
+   * @returns Promise with entity creation response
+   */
   return async function(
     baseUrl: string,
     adAccountId: string,
     accessToken: string,
-    config: T,
-    fields?: string
-  ): Promise<V> {
+    config: any
+  ): Promise<any> {
     try {
-      // Validate using schema
-      const validatedConfig = schema.parse(config);
+      // Path for the API request
+      const path = pathFn(baseUrl, adAccountId);
       
-      // Convert camelCase to snake_case for API params
-      const params = humps.decamelizeKeys(validatedConfig);
-      
-      // API path based on entity type
-      const path = `act_${adAccountId}/${entityType}s`;
-      
-      // Make the API request
-      const response = await apiRequest<{id: string}>(
+      // Pass parameters directly to Facebook API
+      const response = await apiRequest(
         baseUrl,
         path,
         accessToken,
         'POST',
-        params
+        config
       );
-      
-      // If fields are provided, get the created entity
-      if (fields) {
-        const entity = await apiRequest<U>(
+
+      // Get the created entity
+      if (response && response.id) {
+        const entity = await apiRequest(
           baseUrl,
           `${response.id}`,
           accessToken,
           'GET',
-          { fields }
+          { fields: fieldsForGet }
         );
-        
+
         return {
           success: true,
           id: response.id,
           data: entity
-        } as unknown as V;
+        };
+      } else {
+        throw new Error('No ID returned from create operation');
       }
-      
-      return {
-        success: true,
-        id: response.id
-      } as unknown as V;
     } catch (error) {
-      handleApiError(error, `create ${entityType}`);
-      throw error; // Satisfy TypeScript
+      // Pass error directly
+      throw error;
     }
   };
 }
 
 /**
- * Generic get operation for Facebook entities
- * 
- * @param entityType Entity type name (e.g., 'campaign', 'adset', 'ad')
- * @returns A function that retrieves the entity
+ * Creates a template for entity retrieval operations
+ * @param fieldsArr Array of fields to retrieve
+ * @returns Function for retrieving entities
  */
-export function getOperation<T>(entityType: string) {
-  return async function(
-    baseUrl: string,
-    accessToken: string,
-    entityId: string,
-    fields: string | string[]
-  ): Promise<T> {
-    try {
-      // Format fields if it's an array
-      const fieldString = Array.isArray(fields) ? fields.join(',') : fields;
-      
-      return await apiRequest<T>(
-        baseUrl,
-        entityId,
-        accessToken,
-        'GET',
-        { fields: fieldString }
-      );
-    } catch (error) {
-      handleApiError(error, `get ${entityType} ${entityId}`);
-      throw error; // Satisfy TypeScript
-    }
-  };
-}
-
-/**
- * Generic update operation for Facebook entities
- * 
- * @param entityType Entity type name (e.g., 'campaign', 'adset', 'ad')
- * @returns A function that updates the entity
- */
-export function updateOperation<T, U extends Record<string, unknown>, V>(
-  entityType: string,
+export function getEntityTemplate(
+  fieldsArr: string[]
 ) {
+  /**
+   * Retrieves an entity by ID
+   * @param baseUrl Base URL for the API
+   * @param accessToken Facebook access token
+   * @param entityId The ID of the entity to retrieve
+   * @returns Promise with entity data
+   */
+  return async function(
+    baseUrl: string,
+    accessToken: string,
+    entityId: string
+  ): Promise<any> {
+    // Join fields for the API request
+    const fields = fieldsArr.join(',');
+
+    return await apiRequest(
+      baseUrl,
+      entityId,
+      accessToken,
+      'GET',
+      { fields }
+    );
+  };
+}
+
+/**
+ * Creates a template for entity update operations
+ * @param getEntityFn Function to retrieve the updated entity
+ * @returns Function for updating entities
+ */
+export function updateEntityTemplate(
+  getEntityFn: (baseUrl: string, accessToken: string, entityId: string) => Promise<any>
+) {
+  /**
+   * Updates an entity
+   * @param baseUrl Base URL for the API
+   * @param accessToken Facebook access token
+   * @param entityId The ID of the entity to update
+   * @param config Entity configuration object with fields to update
+   * @returns Promise with updated entity data
+   */
   return async function(
     baseUrl: string,
     accessToken: string,
     entityId: string,
-    config: Partial<T>,
-    fields?: string
-  ): Promise<V> {
+    config: any
+  ): Promise<any> {
     try {
-      // For updates, we accept partial data and skip validation
-      // since z.ZodType doesn't directly support .partial() in a type-safe way
-      
-      // Convert camelCase to snake_case for API params
-      const params = humps.decamelizeKeys(config);
-      
-      // Make the API request
+      // Pass config directly to API
       await apiRequest(
         baseUrl,
         entityId,
         accessToken,
         'POST',
-        params
+        config
       );
-      
-      // If fields are provided, get the updated entity
-      if (fields) {
-        const entity = await apiRequest<U>(
-          baseUrl,
-          entityId,
-          accessToken,
-          'GET',
-          { fields }
-        );
-        
-        return {
-          success: true,
-          id: entityId,
-          data: entity
-        } as unknown as V;
-      }
-      
+
+      // Get updated entity
+      const entity = await getEntityFn(baseUrl, accessToken, entityId);
+
       return {
         success: true,
-        id: entityId
-      } as unknown as V;
+        id: entityId,
+        data: entity
+      };
     } catch (error) {
-      handleApiError(error, `update ${entityType} ${entityId}`);
-      throw error; // Satisfy TypeScript
+      // Pass error directly
+      throw error;
     }
   };
 }
 
 /**
- * Generic list operation for Facebook entities
- * 
- * @param entityType Entity type name (e.g., 'campaign', 'adset', 'ad')
- * @returns A function that lists entities
+ * Creates a template for retrieving multiple entities
+ * @param pathFn Function to generate the path for the API request
+ * @param fieldsArr Array of fields to retrieve
+ * @returns Function for retrieving multiple entities
  */
-export function listOperation<T>(entityType: string) {
+export function getEntitiesTemplate(
+  pathFn: (baseUrl: string, idOrAccountId: string) => string,
+  fieldsArr: string[]
+) {
+  /**
+   * Retrieves multiple entities
+   * @param baseUrl Base URL for the API
+   * @param idOrAccountId Entity ID or account ID
+   * @param accessToken Facebook access token
+   * @param additionalParams Additional parameters for the API request
+   * @returns Promise with array of entities
+   */
   return async function(
     baseUrl: string,
-    adAccountId: string,
+    idOrAccountId: string,
     accessToken: string,
-    fields: string | string[],
-    limit?: number,
-    params: Record<string, any> = {}
-  ): Promise<T[]> {
-    try {
-      // Format fields if it's an array
-      const fieldString = Array.isArray(fields) ? fields.join(',') : fields;
-      
-      // Build request parameters
-      const requestParams: Record<string, any> = {
-        fields: fieldString,
-        ...params
-      };
-      
-      // Add limit if provided
-      if (limit) {
-        requestParams.limit = limit;
-      }
-      
-      // Make the API request
-      const response = await apiRequest<{data: T[]}>(
-        baseUrl,
-        `act_${adAccountId}/${entityType}s`,
-        accessToken,
-        'GET',
-        requestParams
-      );
-      
-      return response.data;
-    } catch (error) {
-      handleApiError(error, `list ${entityType}s`);
-      throw error; // Satisfy TypeScript
-    }
+    additionalParams: Record<string, any> = {}
+  ): Promise<any[]> {
+    // Path for the API request
+    const path = pathFn(baseUrl, idOrAccountId);
+    
+    // Create parameter object
+    const params: Record<string, any> = {
+      ...additionalParams,
+      fields: fieldsArr.join(',')
+    };
+
+    // Make the API request
+    const response = await apiRequest(
+      baseUrl,
+      path,
+      accessToken,
+      'GET',
+      params
+    );
+
+    return response.data || [];
   };
 } 

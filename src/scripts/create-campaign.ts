@@ -22,7 +22,7 @@ import {
   CampaignObjective, 
   CampaignStatus, 
   BidStrategy,
-} from '../types';
+} from '..';
 
 // Create a client instance
 const client = new FacebookMarketingClient(fbConfig);

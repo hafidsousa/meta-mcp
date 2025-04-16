@@ -1,29 +1,14 @@
 /**
  * @fileoverview Facebook Marketing API Client for Meta Client Platform
  * 
- * @note For AI Assistants:
- * - Use instance methods for Campaign/AdSet/Ad operations
- * - Handle errors appropriately and provide detailed logs
- * - Directly use Facebook Graph API without SDK dependencies
- * - Follow Facebook's best practices for ad management
- * - All monetary values should be in cents (2000 = $20.00)
+ * @note IMPORTANT: This is a pure pass-through proxy. All requests and responses
+ * are passed directly to and from the Facebook API without modification.
+ * All request payloads must use Facebook API's required formats (snake_case).
+ * The Facebook API documentation should be referenced for all parameters:
+ * https://developers.facebook.com/docs/marketing-apis/
  */
 
-import {
-  FacebookConfig,
-  CampaignConfig,
-  AdSetConfig,
-  AdConfig,
-  CampaignResponse,
-  AdSetResponse,
-  AdResponse,
-  Campaign,
-  AdSet,
-  Ad,
-  CampaignStatus
-} from './types';
 import { FB_API_VERSION } from './config';
-import { FacebookMarketingError, ErrorCodes } from './errors';
 
 // Import operations from modular files
 import * as CampaignOperations from './operations/campaign';
@@ -32,51 +17,53 @@ import * as AdOperations from './operations/ad';
 import * as AccountOperations from './operations/account';
 
 /**
+ * Configuration for the Facebook Marketing API client
+ */
+export interface FacebookClientConfig {
+  /**
+   * Facebook Access Token
+   */
+  accessToken: string;
+  
+  /**
+   * Facebook Ad Account ID (without the 'act_' prefix)
+   */
+  adAccountId: string;
+  
+  /**
+   * Optional debug mode flag
+   */
+  debug?: boolean;
+}
+
+/**
  * Facebook Marketing API Client
  * Facade pattern implementation for Facebook Marketing API
  */
 export class FacebookMarketingClient {
   private baseUrl: string;
-  private config: FacebookConfig;
+  private config: any;
 
   /**
    * Creates a new Facebook Marketing API client
    * @param config Configuration containing credentials and settings
    */
-  constructor(config: FacebookConfig) {
-    this.validateConfig(config);
+  constructor(config: FacebookClientConfig) {
+    if (!config.accessToken || !config.adAccountId) {
+      throw new Error('Access token and ad account ID are required');
+    }
+    
     this.config = config;
     this.baseUrl = `https://graph.facebook.com/${FB_API_VERSION}`;
-  }
-
-  /**
-   * Validates the client configuration
-   * @param config Client configuration
-   * @throws Error if configuration is invalid
-   */
-  private validateConfig(config: FacebookConfig) {
-    if (!config.accessToken?.trim()) {
-      throw new FacebookMarketingError(
-        'Access token is required',
-        ErrorCodes.INVALID_CREDENTIALS
-      );
-    }
-    // App secret is optional when using MCP tools
-    if (!config.adAccountId?.trim()) {
-      throw new FacebookMarketingError(
-        'Ad account ID is required',
-        ErrorCodes.INVALID_CREDENTIALS
-      );
-    }
   }
 
   // Campaign Operations
   /**
    * Creates a new campaign with specified configuration
-   * @param config Campaign configuration object
+   * @param config Campaign configuration object (in snake_case format)
    * @returns Promise with campaign creation response
    */
-  async createCampaign(config: CampaignConfig): Promise<CampaignResponse> {
+  async createCampaign(config: any): Promise<any> {
     return CampaignOperations.createCampaign(
       this.baseUrl,
       this.config.adAccountId,
@@ -103,7 +90,7 @@ export class FacebookMarketingClient {
    * @param campaignId The ID of the campaign to retrieve
    * @returns Promise with campaign data
    */
-  async getCampaign(campaignId: string): Promise<Campaign> {
+  async getCampaign(campaignId: string): Promise<any> {
     return CampaignOperations.getCampaign(
       this.baseUrl,
       this.config.accessToken,
@@ -115,16 +102,16 @@ export class FacebookMarketingClient {
    * Retrieves all campaigns for the ad account with full details
    * @param limit Optional limit on number of campaigns to return
    * @param status Optional status filter (ACTIVE, PAUSED, etc.)
-   * @param datePreset Optional predefined date range for campaign stats
+   * @param datePreset Optional predefined date range
    * @param timeRange Optional custom date range object {since, until}
    * @returns Promise with array of campaigns
    */
   async getCampaigns(
     limit?: number, 
-    status?: CampaignStatus,
+    status?: string,
     datePreset?: string,
     timeRange?: { since: string; until: string }
-  ): Promise<Campaign[]> {
+  ): Promise<any[]> {
     return CampaignOperations.getCampaigns(
       this.baseUrl,
       this.config.adAccountId,
@@ -139,10 +126,10 @@ export class FacebookMarketingClient {
   /**
    * Updates an existing campaign with new configuration
    * @param campaignId The ID of the campaign to update
-   * @param config Campaign configuration object with fields to update
+   * @param config Campaign configuration object with fields to update (in snake_case format)
    * @returns Promise with updated campaign data
    */
-  async updateCampaign(campaignId: string, config: Partial<CampaignConfig>): Promise<CampaignResponse> {
+  async updateCampaign(campaignId: string, config: any): Promise<any> {
     return CampaignOperations.updateCampaign(
       this.baseUrl,
       this.config.accessToken,
@@ -154,10 +141,10 @@ export class FacebookMarketingClient {
   // Ad Set Operations
   /**
    * Creates a new ad set within a campaign
-   * @param config Ad set configuration object
+   * @param config Ad set configuration object (in snake_case format)
    * @returns Promise with ad set creation response
    */
-  async createAdSet(config: Partial<AdSetConfig>): Promise<AdSetResponse> {
+  async createAdSet(config: any): Promise<any> {
     return AdSetOperations.createAdSet(
       this.baseUrl,
       this.config.adAccountId,
@@ -171,7 +158,7 @@ export class FacebookMarketingClient {
    * @param campaignId ID of the campaign
    * @returns Promise with list of ad sets
    */
-  async getAdSets(campaignId: string): Promise<AdSet[]> {
+  async getAdSets(campaignId: string): Promise<any[]> {
     return AdSetOperations.getAdSets(
       this.baseUrl,
       this.config.accessToken,
@@ -197,7 +184,7 @@ export class FacebookMarketingClient {
    * @param adSetId The ID of the ad set to retrieve
    * @returns Promise with ad set data
    */
-  async getAdSet(adSetId: string): Promise<AdSet> {
+  async getAdSet(adSetId: string): Promise<any> {
     return AdSetOperations.getAdSet(
       this.baseUrl,
       this.config.accessToken,
@@ -206,12 +193,12 @@ export class FacebookMarketingClient {
   }
 
   /**
-   * Retrieves all ad sets for the ad account with full details
-   * @param limit Optional limit on number of ad sets to return
-   * @param status Optional status filter (ACTIVE, PAUSED, etc.)
+   * Gets ad sets for an ad account
+   * @param limit Optional maximum number of ad sets to return
+   * @param status Optional status filter
    * @returns Promise with array of ad sets
    */
-  async getAccountAdSets(limit?: number, status?: string): Promise<AdSet[]> {
+  async getAccountAdSets(limit?: number, status?: string): Promise<any[]> {
     return AdSetOperations.getAccountAdSets(
       this.baseUrl,
       this.config.adAccountId,
@@ -222,12 +209,12 @@ export class FacebookMarketingClient {
   }
 
   /**
-   * Updates an existing ad set with new configuration settings
-   * @param adSetId The ID of the ad set to update
-   * @param config Ad set configuration with updated fields
-   * @returns Promise with update response
+   * Updates an existing ad set
+   * @param adSetId ID of the ad set to update
+   * @param config Ad set configuration with fields to update (in snake_case format)
+   * @returns Promise with updated ad set data
    */
-  async updateAdSet(adSetId: string, config: Partial<AdSetConfig>): Promise<AdSetResponse> {
+  async updateAdSet(adSetId: string, config: any): Promise<any> {
     return AdSetOperations.updateAdSet(
       this.baseUrl,
       this.config.accessToken,
@@ -238,11 +225,11 @@ export class FacebookMarketingClient {
 
   // Ad Operations
   /**
-   * Creates a new ad within an ad set
-   * @param config Ad configuration object
+   * Creates a new ad
+   * @param config Ad configuration (in snake_case format)
    * @returns Promise with ad creation response
    */
-  async createAd(config: AdConfig): Promise<AdResponse> {
+  async createAd(config: any): Promise<any> {
     return AdOperations.createAd(
       this.baseUrl,
       this.config.adAccountId,
@@ -252,11 +239,11 @@ export class FacebookMarketingClient {
   }
 
   /**
-   * Gets all ads for an ad set
-   * @param adSetId ID of the ad set
-   * @returns Promise with list of ads
+   * Retrieves ads for an ad set
+   * @param adSetId Ad set ID
+   * @returns Promise with array of ads
    */
-  async getAds(adSetId: string): Promise<Ad[]> {
+  async getAds(adSetId: string): Promise<any[]> {
     return AdOperations.getAds(
       this.baseUrl,
       this.config.accessToken,
@@ -278,12 +265,12 @@ export class FacebookMarketingClient {
   }
 
   /**
-   * Gets all ads for the ad account
-   * @param limit Optional limit on number of ads to return
-   * @param status Optional status filter (ACTIVE, PAUSED, etc.)
+   * Gets ads for an ad account
+   * @param limit Optional maximum number of ads to return
+   * @param status Optional status filter
    * @returns Promise with array of ads
    */
-  async getAccountAds(limit?: number, status?: string): Promise<Ad[]> {
+  async getAccountAds(limit?: number, status?: string): Promise<any[]> {
     return AdOperations.getAccountAds(
       this.baseUrl,
       this.config.adAccountId,
@@ -294,11 +281,11 @@ export class FacebookMarketingClient {
   }
 
   /**
-   * Gets details for a specific ad
-   * @param adId Ad ID
-   * @returns Promise with ad details
+   * Retrieves a specific ad by ID
+   * @param adId The ID of the ad to retrieve
+   * @returns Promise with ad data
    */
-  async getAd(adId: string): Promise<Ad> {
+  async getAd(adId: string): Promise<any> {
     return AdOperations.getAd(
       this.baseUrl,
       this.config.accessToken,
@@ -308,11 +295,11 @@ export class FacebookMarketingClient {
 
   /**
    * Updates an existing ad
-   * @param adId Ad ID to update
-   * @param config Ad configuration with updated fields
-   * @returns Promise with update response
+   * @param adId ID of the ad to update
+   * @param config Ad configuration with fields to update (in snake_case format)
+   * @returns Promise with updated ad data
    */
-  async updateAd(adId: string, config: Partial<AdConfig>): Promise<AdResponse> {
+  async updateAd(adId: string, config: any): Promise<any> {
     return AdOperations.updateAd(
       this.baseUrl,
       this.config.accessToken,
@@ -321,10 +308,9 @@ export class FacebookMarketingClient {
     );
   }
 
-  // Account Operations
   /**
-   * Gets all available ad accounts for the current user
-   * @returns Promise with list of ad accounts
+   * Retrieves available ad accounts for a user
+   * @returns Promise with user's available ad accounts
    */
   async getAvailableAdAccounts(): Promise<any[]> {
     return AccountOperations.getAvailableAdAccounts(
