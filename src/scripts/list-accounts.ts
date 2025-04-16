@@ -4,7 +4,7 @@
  */
 
 import { config as loadEnv } from 'dotenv';
-import { fetchAdAccounts, extractAdAccountId } from '../mcp-utils';
+import { fetchAdAccounts, extractAdAccountId } from './tools/mcp-utils';
 
 // Define a simple type for account data
 type FacebookAdAccount = {

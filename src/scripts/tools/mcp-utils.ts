@@ -2,7 +2,7 @@
  * @fileoverview MCP (Meta Client Platform) utilities for Facebook Marketing
  */
 
-import { FB_API_VERSION } from './config';
+import { FB_API_VERSION } from '../../config';
 
 /**
  * Fetches available ad accounts using the Facebook Graph API
