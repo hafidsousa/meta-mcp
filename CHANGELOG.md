@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/hafidsousa/meta-mcp/compare/v1.10.0...v1.11.0) (2025-04-16)
+
+
+### Features
+
+* correct spelling in create-campaign documentation ([49edcbb](https://github.com/hafidsousa/meta-mcp/commit/49edcbbe2bce3f0cc7de02b247a392e19dbb20a9))
+
 # [1.10.0](https://github.com/hafidsousa/meta-mcp/compare/v1.9.0...v1.10.0) (2025-04-16)
 
 
