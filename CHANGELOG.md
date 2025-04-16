@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/hafidsousa/meta-mcp/compare/v1.9.0...v1.10.0) (2025-04-16)
+
+
+### Features
+
+* **release:** 1.8.0 [skip ci] ([edb9bff](https://github.com/hafidsousa/meta-mcp/commit/edb9bff1a2278b306353e1a0e59670ab282c9c60))
+
 # [1.9.0](https://github.com/hafidsousa/meta-mcp/compare/v1.8.0...v1.9.0) (2025-04-16)
 
 
