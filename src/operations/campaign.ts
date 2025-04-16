@@ -32,25 +32,7 @@ export async function createCampaign(
       config
     );
 
-    // Get the created campaign
-    const campaign = await apiRequest(
-      baseUrl,
-      `${response.id}`,
-      accessToken,
-      'GET',
-      { 
-        fields: 'id,name,objective,status,created_time,start_time,stop_time,spend_cap,special_ad_categories,' +
-               'special_ad_category_country,daily_budget,lifetime_budget,bid_strategy,boosted_object_id,buying_type,promoted_object,' +
-               'budget_remaining,effective_status,account_id,adlabels,is_skadnetwork_attribution,' +
-               'source_campaign_id,topline_id'
-      }
-    );
-
-    return {
-      success: true,
-      id: response.id,
-      data: campaign
-    };
+    return response;
   } catch (error) {
     // Pass error directly
     throw error;
