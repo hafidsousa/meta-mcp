@@ -138,6 +138,8 @@ export interface CampaignConfig {
   useDefaultBuyingType?: boolean;
   /** Whether this campaign is optimized for buying type */
   isSkadnetworkAttribution?: boolean;
+  /** Campaign buying type - AUCTION is standard for most campaigns, RESERVED is for guaranteed delivery */
+  buyingType?: string;
 }
 
 export interface AdSetConfig {

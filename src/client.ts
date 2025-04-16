@@ -115,15 +115,24 @@ export class FacebookMarketingClient {
    * Retrieves all campaigns for the ad account with full details
    * @param limit Optional limit on number of campaigns to return
    * @param status Optional status filter (ACTIVE, PAUSED, etc.)
+   * @param datePreset Optional predefined date range for campaign stats
+   * @param timeRange Optional custom date range object {since, until}
    * @returns Promise with array of campaigns
    */
-  async getCampaigns(limit?: number, status?: CampaignStatus): Promise<Campaign[]> {
+  async getCampaigns(
+    limit?: number, 
+    status?: CampaignStatus,
+    datePreset?: string,
+    timeRange?: { since: string; until: string }
+  ): Promise<Campaign[]> {
     return CampaignOperations.getCampaigns(
       this.baseUrl,
       this.config.adAccountId,
       this.config.accessToken,
       limit,
-      status
+      status,
+      datePreset,
+      timeRange
     );
   }
 

@@ -57,7 +57,8 @@ export async function createCampaign(
       stopTime: config.stopTime,
       boostedObjectId: config.boostedObjectId,
       promotedObject: config.promotedObject,
-      isSkadnetworkAttribution: config.isSkadnetworkAttribution
+      isSkadnetworkAttribution: config.isSkadnetworkAttribution,
+      buyingType: config.buyingType
     });
     
     // Filter out undefined values
@@ -170,6 +171,8 @@ export async function getCampaign(
  * @param accessToken Facebook access token
  * @param limit Optional limit on number of campaigns to return
  * @param status Optional status filter (ACTIVE, PAUSED, etc.)
+ * @param datePreset Optional predefined date range for campaign stats
+ * @param timeRange Optional custom date range object {since, until}
  * @returns Promise with array of campaigns
  */
 export async function getCampaigns(
@@ -177,7 +180,9 @@ export async function getCampaigns(
   adAccountId: string,
   accessToken: string,
   limit?: number,
-  status?: CampaignStatus
+  status?: CampaignStatus,
+  datePreset?: string,
+  timeRange?: { since: string; until: string }
 ): Promise<Campaign[]> {
   try {
     const params: Record<string, any> = {
@@ -198,6 +203,19 @@ export async function getCampaigns(
 
     if (status) {
       params.effective_status = [status];
+    }
+    
+    // Add date preset if specified
+    if (datePreset) {
+      params.date_preset = datePreset;
+    }
+    
+    // Add time range if specified
+    if (timeRange) {
+      params.time_range = {
+        'since': timeRange.since,
+        'until': timeRange.until
+      };
     }
 
     const response = await apiRequest<{data: Campaign[]}>(
@@ -247,28 +265,46 @@ export async function updateCampaign(
       boostedObjectId: config.boostedObjectId,
       promotedObject: config.promotedObject,
       isSkadnetworkAttribution: config.isSkadnetworkAttribution,
-      useDefaultBuyingType: config.useDefaultBuyingType
+      useDefaultBuyingType: config.useDefaultBuyingType,
+      buyingType: config.buyingType
     });
-    
-    // Make API request to update campaign
-    const response = await apiRequest<{ success: boolean }>(
+
+    // Remove undefined values to avoid overwriting with null
+    const cleanParams = Object.fromEntries(
+      Object.entries(params).filter(([_, v]) => v !== undefined)
+    );
+
+    await apiRequest(
       baseUrl,
       campaignId,
       accessToken,
       'POST',
-      params
+      cleanParams
     );
-    
-    // Get the updated campaign data
-    const campaign = await getCampaign(baseUrl, accessToken, campaignId);
-    
+
+    // Get the updated campaign
+    const campaign = await apiRequest<Campaign>(
+      baseUrl,
+      campaignId,
+      accessToken,
+      'GET',
+      {
+        fields: [
+          'id', 'name', 'objective', 'status', 'created_time', 'start_time', 'stop_time',
+          'spend_cap', 'special_ad_categories', 'daily_budget', 'lifetime_budget',
+          'bid_strategy', 'boosted_object_id', 'buying_type', 'promoted_object',
+          'budget_remaining', 'effective_status', 'account_id', 'adlabels',
+          'is_skadnetwork_attribution'
+        ].join(',')
+      }
+    );
+
     return {
-      success: response.success || true,
+      success: true,
       id: campaignId,
       data: campaign
     };
   } catch (error) {
     handleApiError(error, `update campaign ${campaignId}`);
-    throw error;
   }
 } 

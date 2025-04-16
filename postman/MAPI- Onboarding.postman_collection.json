@@ -1,0 +1,1302 @@
+{
+	"info": {
+		"_postman_id": "91a2f98b-ecdc-4222-9bf1-bc400de59d76",
+		"name": "MAPI- Onboarding",
+		"description": "This collection allows developers/testers to create the different level organizational structure within Marketing API:\n\n- Campaign (AdCampaign Group / L3)\n    \n- AdSet (AdCampaign / L2)\n    \n- AdCreative (L-1)\n    \n- Ad (AdGroup / L1)\n    \n- View Insights\n    \n\nTo use the Marketing API Postman Collection following pre-condition need to be met. For more updated information about Marketing API refer to the official documentation\\[[https://developers.facebook.com/docs/marketing-apis/get-started](https://developers.facebook.com/docs/marketing-apis/get-started)\\]\n\n### Pre-condition\n\n1. Meta App with Marketing API product/use case\n    \n2. Have access to Business Portfolio /Account ID with advertiser permissions (along with permission to business assets: pages, IG accounts, pixels, etc)\n    \n3. Import collection and env variable to postman\n    \n4. Update global variables with your information: account_id, token as well as other needed information for links to promote, images to use, etc. For long lived token, please referr to:\\[[https://developers.facebook.com/docs/marketing-apis/overview/authentication](https://developers.facebook.com/docs/marketing-apis/overview/authentication)\\]\n    \n5. Create Env variable in Postman. As you execute the script variable used to store campaign id, ad id etc will be auto populated there. Make sure to run the first folder to populate such details",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2098886",
+		"_collection_link": "https://www.postman.com/meta/facebook-marketing-api/collection/9jo4f5y/mapi-onboarding?action=share&source=collection_link&creator=2098886"
+	},
+	"item": [
+		{
+			"name": "[Run First] - Pre-Conditions and other data",
+			"item": [
+				{
+					"name": "Get FB page_id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Get the first result",
+									"var firstResult = pm.response.json().promote_pages.data[0];",
+									"// Set a variable with the name and id of the first result",
+									"pm.environment.set(\"page_id\", firstResult.id);",
+									"",
+									"pm.test(\"some data returned\", function () {",
+									"    let jsonData = pm.response.json();",
+									"pm.expect(jsonData.id).to.be.not.null;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}?fields=promote_pages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "promote_pages"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get instagram_actor_id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"pm.environment.set(\"ig_actor_id\", jsonData.data[0][\"id\"]);",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"some data returned\", function () {",
+									"    let jsonData = pm.response.json();",
+									"pm.expect(jsonData.id).to.be.not.null;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}/instagram_accounts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}",
+								"instagram_accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get image_hash",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"pm.environment.set(\"image_hash\", jsonData.data[0][\"hash\"]),",
+									"pm.environment.set(\"image_hash2\", jsonData.data[1][\"hash\"]),",
+									"pm.environment.set(\"image_hash3\", jsonData.data[2][\"hash\"]);",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}/adimages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}",
+								"adimages"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "This folder contains calls to retrieve data needed as pre-conditions for other test cases, such as : pages, ig accounts, image hash, etc.\n\nPlease consider running this first to populate the environment variables."
+		},
+		{
+			"name": "Create- Ads Data Model",
+			"item": [
+				{
+					"name": "Creating campaign [L3]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"campaign_id\", jsonData[\"id\"]);",
+									"pm.test(\"Verify campaign ID is not null\", function () {",
+									"    pm.expect(jsonData.id).to.not.eql(\"\");",
+									"});",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}/campaigns?name=[MAPI]- TRAFFIC - Manual&objective=OUTCOME_TRAFFIC&special_ad_categories=NONE&status=ACTIVE&buying_type=AUCTION",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}",
+								"campaigns"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "[MAPI]- TRAFFIC - Manual"
+								},
+								{
+									"key": "objective",
+									"value": "OUTCOME_TRAFFIC"
+								},
+								{
+									"key": "special_ad_categories",
+									"value": "NONE"
+								},
+								{
+									"key": "status",
+									"value": "ACTIVE"
+								},
+								{
+									"key": "buying_type",
+									"value": "AUCTION"
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Creating adSet [L2]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"adSet_id\", jsonData[\"id\"]);",
+									"pm.test(\"Verify adSet ID is not null\", function () {",
+									"    pm.expect(jsonData.id).to.not.eql(\"\");",
+									"});",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}/adsets?name=TRAFFIC- LINK_CLICKS&objective=LINK_CLICKS&billing_event=IMPRESSIONS&status=PAUSED&targeting={\"age_max\":65,\"age_min\":21,\"geo_locations\":{\"countries\":[\"CA\",\"MX\",\"US\"],\"location_types\":[\"home\",\"recent\"]}}&daily_budget=2100&campaign_id={{campaign_id}}&bid_strategy=LOWEST_COST_WITHOUT_CAP",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}",
+								"adsets"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "TRAFFIC- LINK_CLICKS"
+								},
+								{
+									"key": "objective",
+									"value": "LINK_CLICKS"
+								},
+								{
+									"key": "billing_event",
+									"value": "IMPRESSIONS"
+								},
+								{
+									"key": "status",
+									"value": "PAUSED"
+								},
+								{
+									"key": "targeting",
+									"value": "{\"age_max\":65,\"age_min\":21,\"geo_locations\":{\"countries\":[\"CA\",\"MX\",\"US\"],\"location_types\":[\"home\",\"recent\"]}}"
+								},
+								{
+									"key": "daily_budget",
+									"value": "2100"
+								},
+								{
+									"key": "campaign_id",
+									"value": "{{campaign_id}}"
+								},
+								{
+									"key": "bid_strategy",
+									"value": "LOWEST_COST_WITHOUT_CAP"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Creating standalone adCreative [L-1]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"creative_id\", jsonData[\"id\"]);",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}/adcreatives?degrees_of_freedom_spec={\"creative_features_spec\":{\"standard_enhancements\":{\"enroll_status\":\"OPT_IN\"}}}&object_story_spec={\"instagram_actor_id\":\"{{ig_actor_id}}\",\"page_id\":\"{{page_id}}\",\"link_data\":{\"call_to_action\":{\"type\":\"GET_OFFER\"},\"image_hash\":\"{{image_hash}}\",\"link\":\"{{link}}\",\"message\":\"This is my ad text\"}}&name=SingleImage Ad creative",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}",
+								"adcreatives"
+							],
+							"query": [
+								{
+									"key": "degrees_of_freedom_spec",
+									"value": "{\"creative_features_spec\":{\"standard_enhancements\":{\"enroll_status\":\"OPT_IN\"}}}"
+								},
+								{
+									"key": "object_story_spec",
+									"value": "{\"instagram_actor_id\":\"{{ig_actor_id}}\",\"page_id\":\"{{page_id}}\",\"link_data\":{\"call_to_action\":{\"type\":\"GET_OFFER\"},\"image_hash\":\"{{image_hash}}\",\"link\":\"{{link}}\",\"message\":\"This is my ad text\"}}"
+								},
+								{
+									"key": "name",
+									"value": "SingleImage Ad creative"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Creating an Ad based on adCreative ID [L1]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"var jsonData = pm.response.json();\r",
+									"pm.collectionVariables.set(\"ad_idCreative\", jsonData[\"id\"]);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}/ads?name=Testing Ad- singleImage-POSTMAN&status=PAUSED&adset_id={{adSet_id}}&creative={\"creative_id\": \"{{creative_id}}\"}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}",
+								"ads"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Testing Ad- singleImage-POSTMAN"
+								},
+								{
+									"key": "status",
+									"value": "PAUSED"
+								},
+								{
+									"key": "adset_id",
+									"value": "{{adSet_id}}"
+								},
+								{
+									"key": "creative",
+									"value": "{\"creative_id\": \"{{creative_id}}\"}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Creating Ad and configuring adCreative upon creation [L1]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"pm.collectionVariables.set(\"ad_id\", jsonData[\"id\"]);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}/ads?name=Testing Ad- POSTMAN&status=PAUSED&adset_id={{adSet_id}}&creative={\"object_story_spec\":{\"page_id\":\"{{page_id}}\",\"instagram_actor_id\":\"{{ig_actor_id}}\",\"link_data\":{\"call_to_action\":{\"type\":\"LEARN_MORE\"},\"message\":\"my testing Ad\",\"picture\":\"{{image_url}}\",\"link\":\"{{link}}\"}},\"degrees_of_freedom_spec\":{\"creative_features_spec\":{\"standard_enhancements\":{\"enroll_status\":\"OPT_IN\"}}}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}",
+								"ads"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Testing Ad- POSTMAN"
+								},
+								{
+									"key": "status",
+									"value": "PAUSED"
+								},
+								{
+									"key": "adset_id",
+									"value": "{{adSet_id}}"
+								},
+								{
+									"key": "creative",
+									"value": "{\"object_story_spec\":{\"page_id\":\"{{page_id}}\",\"instagram_actor_id\":\"{{ig_actor_id}}\",\"link_data\":{\"call_to_action\":{\"type\":\"LEARN_MORE\"},\"message\":\"my testing Ad\",\"picture\":\"{{image_url}}\",\"link\":\"{{link}}\"}},\"degrees_of_freedom_spec\":{\"creative_features_spec\":{\"standard_enhancements\":{\"enroll_status\":\"OPT_IN\"}}}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieving AdAccount details [L4]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"// Define the expected fields",
+									"var expectedFields = [\"id\", \"name\", \"business\", \"instagram_accounts\", \"currency\", \"business_name\"];",
+									"// Loop through each expected field",
+									"expectedFields.forEach(function(field) {",
+									"    // Check if the field exists in the response data",
+									"    if (!jsonData.hasOwnProperty(field)) {",
+									"        throw new Error(`Field '${field}' is missing from the response.`);",
+									"    }",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}?fields=id,name,business,business_name,amount_spent,balance,currency,default_dsa_beneficiary,default_dsa_payor,timezone_name,instagram_accounts{id,username},spend_cap",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "id,name,business,business_name,amount_spent,balance,currency,default_dsa_beneficiary,default_dsa_payor,timezone_name,instagram_accounts{id,username},spend_cap"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieving campaign details [L3]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"// Define the expected fields",
+									"var expectedFields = [\"account_id\", \"id\", \"name\", \"status\", \"start_time\", \"objective\",\"bid_strategy\",\"special_ad_category\",\"special_ad_category_country\"];",
+									"// Loop through each expected field",
+									"expectedFields.forEach(function(field) {",
+									"    // Check if the field exists in the response data",
+									"    if (!jsonData.hasOwnProperty(field)) {",
+									"        throw new Error(`Field '${field}' is missing from the response.`);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{account_id}}?fields=id,account_id,name,status,start_time,stop_time,objective,daily_budget,lifetime_budget,bid_strategy,buying_type,smart_promotion_type,special_ad_category,special_ad_category_country,spend_cap,promoted_object",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{account_id}}"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "id,account_id,name,status,start_time,stop_time,objective,daily_budget,lifetime_budget,bid_strategy,buying_type,smart_promotion_type,special_ad_category,special_ad_category_country,spend_cap,promoted_object"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieving adSet details [L2]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"// Define the expected fields",
+									"var expectedFields = [\"name\", \"id\", \"name\", \"campaign_id\", \"optimization_goal\", \"start_time\",\"end_time\",\"destination_type\"];",
+									"// Loop through each expected field",
+									"expectedFields.forEach(function(field) {",
+									"    // Check if the field exists in the response data",
+									"    if (!jsonData.hasOwnProperty(field)) {",
+									"        throw new Error(`Field '${field}' is missing from the response.`);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{adSet_id}}?fields=name,campaign_id,optimization_goal,start_time,end_time,bid_strategy,destination_type",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{adSet_id}}"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "name,campaign_id,optimization_goal,start_time,end_time,bid_strategy,destination_type"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieving adCreative details [L-1]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"// Define the expected fields",
+									"var expectedFields = [\"body\", \"call_to_action_type\", \"degrees_of_freedom_spec\", \"image_hash\",\"instagram_actor_id\",\"name\",\"status\"];",
+									"// Loop through each expected field",
+									"expectedFields.forEach(function(field) {",
+									"    // Check if the field exists in the response data",
+									"    if (!jsonData.hasOwnProperty(field)) {",
+									"        throw new Error(`Field '${field}' is missing from the response.`);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{creative_id}}?fields=asset_feed_spec,body,call_to_action_type,degrees_of_freedom_spec,effective_instagram_media_id,effective_object_story_id,image_hash,image_url,instagram_actor_id,name,account_id,status,title",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{creative_id}}"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "asset_feed_spec,body,call_to_action_type,degrees_of_freedom_spec,effective_instagram_media_id,effective_object_story_id,image_hash,image_url,instagram_actor_id,name,account_id,status,title"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieving Ad details [L1]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"// Define the expected fields",
+									"var expectedFields = [\"name\", \"campaign\", \"adset\", \"adcreatives\",\"status\",\"created_time\"];",
+									"// Loop through each expected field",
+									"expectedFields.forEach(function(field) {",
+									"    // Check if the field exists in the response data",
+									"    if (!jsonData.hasOwnProperty(field)) {",
+									"        throw new Error(`Field '${field}' is missing from the response.`);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{ad_id}}?fields=name,campaign{id,name,objective},adset{id,name,optimization_goal},adcreatives{id,image_hash,image_url,effective_object_story_id,effective_instagram_media_id,call_to_action_type},status,created_time,ad_schedule_end_time\n",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{ad_id}}"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "name,campaign{id,name,objective},adset{id,name,optimization_goal},adcreatives{id,image_hash,image_url,effective_object_story_id,effective_instagram_media_id,call_to_action_type},status,created_time,ad_schedule_end_time\n"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Updating AdAccount basic details [L4]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Response should be successful\", function () {",
+									"  pm.expect(pm.response.json().success).to.eql(true);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}?spend_cap=50000&name=UPDT-TestAdAccount&notifications_enabled=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}"
+							],
+							"query": [
+								{
+									"key": "spend_cap",
+									"value": "50000"
+								},
+								{
+									"key": "name",
+									"value": "UPDT-TestAdAccount"
+								},
+								{
+									"key": "notifications_enabled",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Updating campaign details [L3]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Response should be successful\", function () {",
+									"  pm.expect(pm.response.json().success).to.eql(true);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{campaign_id}}?name=My Campaign- updated&daily_budget=5000&special_ad_categories=HOUSING&status=PAUSED&special_ad_category_country=[\"US\"]",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{campaign_id}}"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "My Campaign- updated"
+								},
+								{
+									"key": "daily_budget",
+									"value": "5000"
+								},
+								{
+									"key": "special_ad_categories",
+									"value": "HOUSING"
+								},
+								{
+									"key": "status",
+									"value": "PAUSED"
+								},
+								{
+									"key": "special_ad_category_country",
+									"value": "[\"US\"]"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Updating adSet details [L2]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Response should be successful\", function () {",
+									"  pm.expect(pm.response.json().success).to.eql(true);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{adSet_id}}?name=MyAdSet updated&targeting={\"geo_locations\":{\"countries\":[\"US\"],\"location_types\":[\"home\",\"recent\"]}} &end_time=2025-01-31T00:59:59-0600&status=PAUSED",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{adSet_id}}"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "MyAdSet updated"
+								},
+								{
+									"key": "targeting",
+									"value": "{\"geo_locations\":{\"countries\":[\"US\"],\"location_types\":[\"home\",\"recent\"]}} "
+								},
+								{
+									"key": "end_time",
+									"value": "2025-01-31T00:59:59-0600"
+								},
+								{
+									"key": "status",
+									"value": "PAUSED"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Updating ad details [L1]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Response should be successful\", function () {",
+									"  pm.expect(pm.response.json().success).to.eql(true);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{ad_id}}?name=My Ad [Updated]&status=PAUSED&creative={\"object_story_spec\":{\"page_id\":\"{{page_id}}\",\"instagram_actor_id\":\"{{ig_actor_id}}\",\"link_data\":{\"call_to_action\":{\"type\":\"LEARN_MORE\"},\"image_hash\":\"{{image_hash2}}\",\"link\":\"{{link}}\"}},\"degrees_of_freedom_spec\":{\"creative_features_spec\":{\"standard_enhancements\":{\"enroll_status\":\"OPT_IN\"}}}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{ad_id}}"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "My Ad [Updated]"
+								},
+								{
+									"key": "status",
+									"value": "PAUSED"
+								},
+								{
+									"key": "creative",
+									"value": "{\"object_story_spec\":{\"page_id\":\"{{page_id}}\",\"instagram_actor_id\":\"{{ig_actor_id}}\",\"link_data\":{\"call_to_action\":{\"type\":\"LEARN_MORE\"},\"image_hash\":\"{{image_hash2}}\",\"link\":\"{{link}}\"}},\"degrees_of_freedom_spec\":{\"creative_features_spec\":{\"standard_enhancements\":{\"enroll_status\":\"OPT_IN\"}}}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get insight details from an adAccount [L4]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"// Define the expected fields",
+									"var expectedFields = [\"data\"];",
+									"// Loop through each expected field",
+									"expectedFields.forEach(function(field) {",
+									"    // Check if the field exists in the response data",
+									"    if (!jsonData.hasOwnProperty(field)) {",
+									"        throw new Error(`Field '${field}' is missing from the response.`);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/act_{{account_id}}/insights?fields=impressions,clicks,conversions,cpc,cpm,cpp,ctr,frequency,reach,social_spend,video_play_actions,spend, account_currency&time_range={\"since\":\"2024-06-01\",\"until\":\"2024-12-15\"}&breakdowns=age,gender",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"act_{{account_id}}",
+								"insights"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "impressions,clicks,conversions,cpc,cpm,cpp,ctr,frequency,reach,social_spend,video_play_actions,spend, account_currency"
+								},
+								{
+									"key": "time_range",
+									"value": "{\"since\":\"2024-06-01\",\"until\":\"2024-12-15\"}"
+								},
+								{
+									"key": "breakdowns",
+									"value": "age,gender"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Campaign Insights [L3]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"// Define the expected fields",
+									"var expectedFields = [\"data\"];",
+									"// Loop through each expected field",
+									"expectedFields.forEach(function(field) {",
+									"    // Check if the field exists in the response data",
+									"    if (!jsonData.hasOwnProperty(field)) {",
+									"        throw new Error(`Field '${field}' is missing from the response.`);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{campaign_id}}/insights?fields=impressions,clicks,conversions,cpc,cpm,cpp,ctr,frequency,reach,social_spend,video_play_actions,spend, account_currency&breakdowns=age,gender",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{campaign_id}}",
+								"insights"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "impressions,clicks,conversions,cpc,cpm,cpp,ctr,frequency,reach,social_spend,video_play_actions,spend, account_currency"
+								},
+								{
+									"key": "breakdowns",
+									"value": "age,gender"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get AdSet Insights [L2]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"// Define the expected fields",
+									"var expectedFields = [\"data\"];",
+									"// Loop through each expected field",
+									"expectedFields.forEach(function(field) {",
+									"    // Check if the field exists in the response data",
+									"    if (!jsonData.hasOwnProperty(field)) {",
+									"        throw new Error(`Field '${field}' is missing from the response.`);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{adSet_id}}/insights?date_preset=last_quarter",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{adSet_id}}",
+								"insights"
+							],
+							"query": [
+								{
+									"key": "date_preset",
+									"value": "last_quarter"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ad Insights [L1]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"// Define the expected fields",
+									"var expectedFields = [\"data\"];",
+									"// Loop through each expected field",
+									"expectedFields.forEach(function(field) {",
+									"    // Check if the field exists in the response data",
+									"    if (!jsonData.hasOwnProperty(field)) {",
+									"        throw new Error(`Field '${field}' is missing from the response.`);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{ad_id}}/insights?fields=ad_id,clicks,impressions,spend,outbound_clicks,actions,action_values,cost_per_unique_action_type,reach&action_report_time=conversion&date_preset=this_year",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{ad_id}}",
+								"insights"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "ad_id,clicks,impressions,spend,outbound_clicks,actions,action_values,cost_per_unique_action_type,reach"
+								},
+								{
+									"key": "action_report_time",
+									"value": "conversion"
+								},
+								{
+									"key": "date_preset",
+									"value": "this_year"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "This folder contains calls to **create** the different data models:\n\n- Campaign / L3\n    \n- AdSet / L2\n    \n- AdCreative / L-1\n    \n- Ad / L1\n    \n- Insights"
+		}
+	]
+}

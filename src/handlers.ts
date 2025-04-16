@@ -110,7 +110,15 @@ export const callToolHandler = async (request: any) => {
         break;
       
       case "getCampaigns":
-        result = await client.getCampaigns();
+        result = await client.getCampaigns(
+          typeof args.limit === 'number' ? args.limit : undefined,
+          typeof args.status === 'string' ? args.status : undefined,
+          typeof args.datePreset === 'string' ? args.datePreset : undefined,
+          args.timeRange ? {
+            since: args.timeRange.since,
+            until: args.timeRange.until
+          } : undefined
+        );
         break;
       
       case "getAccountAds":
